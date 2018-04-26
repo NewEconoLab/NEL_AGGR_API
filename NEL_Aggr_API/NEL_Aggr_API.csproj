@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>NEL_Agency_API</AssemblyName>
+    <RootNamespace>NEL_Agency_API</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="mongodbsettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.0.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.1" />
+    <PackageReference Include="MongoDB.Driver" Version="2.5.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="PagedList.Core" Version="1.17.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="mongodbsettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="llvm">
+      <HintPath>..\..\..\neo-thinsdk-cs\thinSDK\bin\Debug\netcoreapp2.0\llvm.dll</HintPath>
+    </Reference>
+    <Reference Include="thinSDK">
+      <HintPath>..\..\..\neo-thinsdk-cs\thinSDK\bin\Debug\netcoreapp2.0\thinSDK.dll</HintPath>
+    </Reference>
+    <Reference Include="thinSDK_neo">
+      <HintPath>..\..\..\neo-thinsdk-cs\thinSDK\bin\Debug\netcoreapp2.0\thinSDK_neo.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties Properties_4launchSettings_1json__JSONSchema="http://json.schemastore.org/project-1.0.0-beta6" /></VisualStudio></ProjectExtensions>
+
+</Project>

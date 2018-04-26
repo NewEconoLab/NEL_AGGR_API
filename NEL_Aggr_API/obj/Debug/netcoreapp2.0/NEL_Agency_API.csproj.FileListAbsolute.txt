@@ -1,0 +1,35 @@
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\bin\Debug\netcoreapp2.0\NEL_Agency_API.deps.json
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\bin\Debug\netcoreapp2.0\NEL_Agency_API.runtimeconfig.json
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\bin\Debug\netcoreapp2.0\NEL_Agency_API.runtimeconfig.dev.json
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\bin\Debug\netcoreapp2.0\NEL_Agency_API.dll
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\bin\Debug\netcoreapp2.0\NEL_Agency_API.pdb
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\bin\Debug\netcoreapp2.0\llvm.dll
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\bin\Debug\netcoreapp2.0\thinSDK.dll
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\bin\Debug\netcoreapp2.0\thinSDK_neo.dll
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\bin\Debug\netcoreapp2.0\llvm.pdb
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\bin\Debug\netcoreapp2.0\thinSDK.pdb
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\bin\Debug\netcoreapp2.0\thinSDK_neo.pdb
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\obj\Debug\netcoreapp2.0\NEL_Agency_API.csproj.CoreCompileInputs.cache
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\obj\Debug\netcoreapp2.0\NEL_Agency_API.AssemblyInfoInputs.cache
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\obj\Debug\netcoreapp2.0\NEL_Agency_API.AssemblyInfo.cs
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\obj\Debug\netcoreapp2.0\NEL_Agency_API.csproj.CopyComplete
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\obj\Debug\netcoreapp2.0\NEL_Agency_API.dll
+D:\work\NEL_Agency _API\NEL_Agency _API\NEL_Agency _API\obj\Debug\netcoreapp2.0\NEL_Agency_API.pdb
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\bin\Debug\netcoreapp2.0\NEL_Agency_API.deps.json
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\bin\Debug\netcoreapp2.0\NEL_Agency_API.runtimeconfig.json
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\bin\Debug\netcoreapp2.0\NEL_Agency_API.runtimeconfig.dev.json
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\bin\Debug\netcoreapp2.0\NEL_Agency_API.dll
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\bin\Debug\netcoreapp2.0\NEL_Agency_API.pdb
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\bin\Debug\netcoreapp2.0\llvm.dll
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\bin\Debug\netcoreapp2.0\thinSDK.dll
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\bin\Debug\netcoreapp2.0\thinSDK_neo.dll
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\bin\Debug\netcoreapp2.0\llvm.pdb
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\bin\Debug\netcoreapp2.0\thinSDK.pdb
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\bin\Debug\netcoreapp2.0\thinSDK_neo.pdb
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\obj\Debug\netcoreapp2.0\NEL_Agency_API.csprojResolveAssemblyReference.cache
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\obj\Debug\netcoreapp2.0\NEL_Agency_API.csproj.CoreCompileInputs.cache
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\obj\Debug\netcoreapp2.0\NEL_Agency_API.AssemblyInfoInputs.cache
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\obj\Debug\netcoreapp2.0\NEL_Agency_API.AssemblyInfo.cs
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\obj\Debug\netcoreapp2.0\NEL_Agency_API.csproj.CopyComplete
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\obj\Debug\netcoreapp2.0\NEL_Agency_API.dll
+D:\work\NEL_Agency _API\NEL_Agency_API\NEL_Agency_API\obj\Debug\netcoreapp2.0\NEL_Agency_API.pdb

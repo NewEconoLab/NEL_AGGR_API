@@ -1,0 +1,17 @@
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\bin\Release\netcoreapp2.0\NEO_Block_API.deps.json
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\bin\Release\netcoreapp2.0\NEO_Block_API.runtimeconfig.json
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\bin\Release\netcoreapp2.0\NEO_Block_API.runtimeconfig.dev.json
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\bin\Release\netcoreapp2.0\NEO_Block_API.dll
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\bin\Release\netcoreapp2.0\NEO_Block_API.pdb
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\bin\Release\netcoreapp2.0\llvm.dll
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\bin\Release\netcoreapp2.0\thinSDK.dll
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\bin\Release\netcoreapp2.0\thinSDK_neo.dll
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\bin\Release\netcoreapp2.0\llvm.pdb
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\bin\Release\netcoreapp2.0\thinSDK.pdb
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\bin\Release\netcoreapp2.0\thinSDK_neo.pdb
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\obj\Release\netcoreapp2.0\NEO_Block_API.csproj.CoreCompileInputs.cache
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\obj\Release\netcoreapp2.0\NEO_Block_API.AssemblyInfoInputs.cache
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\obj\Release\netcoreapp2.0\NEO_Block_API.AssemblyInfo.cs
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\obj\Release\netcoreapp2.0\NEO_Block_API.csproj.CopyComplete
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\obj\Release\netcoreapp2.0\NEO_Block_API.dll
+D:\work\NEO_Block_API\NEO_Block_API\NEO_Block_API\obj\Release\netcoreapp2.0\NEO_Block_API.pdb
