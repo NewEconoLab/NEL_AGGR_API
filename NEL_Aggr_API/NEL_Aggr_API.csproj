@@ -37,13 +37,13 @@
 
   <ItemGroup>
     <Reference Include="llvm">
-      <HintPath>..\..\..\neo-thinsdk-cs\thinSDK\bin\Debug\netcoreapp2.0\llvm.dll</HintPath>
+      <HintPath>..\..\neo-thinsdk-cs\thinSDK\bin\Debug\netcoreapp2.0\llvm.dll</HintPath>
     </Reference>
     <Reference Include="thinSDK">
-      <HintPath>..\..\..\neo-thinsdk-cs\thinSDK\bin\Debug\netcoreapp2.0\thinSDK.dll</HintPath>
+      <HintPath>..\..\neo-thinsdk-cs\thinSDK\bin\Debug\netcoreapp2.0\thinSDK.dll</HintPath>
     </Reference>
     <Reference Include="thinSDK_neo">
-      <HintPath>..\..\..\neo-thinsdk-cs\thinSDK\bin\Debug\netcoreapp2.0\thinSDK_neo.dll</HintPath>
+      <HintPath>..\..\neo-thinsdk-cs\thinSDK\bin\Debug\netcoreapp2.0\thinSDK_neo.dll</HintPath>
     </Reference>
   </ItemGroup>
 

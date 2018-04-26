@@ -1,2 +1,5 @@
 /NEL_Aggr_API/mongodbsettings.json
 /.vs
+/
+/NEL_Aggr_API/bin
+/NEL_Aggr_API/obj
