@@ -207,7 +207,26 @@ namespace NEL_Agency_API.lib
 
         }
 
-        public string DeleteOneData(string mongodbConnStr, string mongodbDatabase, string coll, string deleteBson)
+        public string InsertOneData(string mongodbConnStr, string mongodbDatabase, string coll, BsonDocument insertBson)
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>(coll);
+            try
+            {
+                collection.InsertOne(insertBson);
+                client = null;
+                return "suc";
+            }
+            catch (Exception e)
+            {
+                client = null;
+                return "faild"; ;
+            }
+
+        }
+
+        public string DeleteData(string mongodbConnStr, string mongodbDatabase, string coll, string deleteBson)
         {
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
