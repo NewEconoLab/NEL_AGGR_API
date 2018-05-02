@@ -188,15 +188,15 @@ namespace NEL_Agency_API.Controllers
                         var phone = req.@params[0].ToString();
 
                         //防止频发发送
-                        //long timestamp = (DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000;
-                        //
-                        //findFliter = "{phone:\"" + phone + "\"}";
-                        //JArray Ja = mh.GetData(mongodbConnStr, mongodbDatabase, "authcode", findFliter);
-                        //if (Ja.Count>0 && timestamp - (long)Ja[0]["timestamp"] < 60)
-                        //{
-                        //    result = getJAbyKV("result", "频繁提交");
-                        //    break;
-                        //}
+                        long timestamp = (DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000;
+                        
+                        findFliter = "{phone:\"" + phone + "\"}";
+                        JArray Ja = mh.GetData(mongodbConnStr, mongodbDatabase, "authcode", findFliter);
+                        if (Ja.Count>0 && timestamp - (long)Ja[0]["timestamp"] < 60)
+                        {
+                            result = getJAbyKV("result", "频繁提交");
+                            break;
+                        }
                         //随机六个数字作为验证码
                         Random rd = new Random();
                         var authcode = "";
@@ -204,7 +204,7 @@ namespace NEL_Agency_API.Controllers
                         {
                             authcode += rd.Next(10).ToString();
                         }
-                        var data = "{\"account\":\"I5676235\",\"password\":\"QFxy6lN2nua501\",\"mobile\":\"8618616380414\",\"msg\":\"【NNS】 Your verification code is  "+authcode+"  Please enter it within 5 minutes. Thank you for your support to NNS. Wishing you a happy life!\"}";
+                        var data = "{\"account\":\"I5676235\",\"password\":\"QFxy6lN2nua501\",\"mobile\":\""+ phone + "\",\"msg\":\"【NNS】 Your verification code is  "+authcode+"  Please enter it within 5 minutes. Thank you for your support to NNS. Wishing you a happy life!\"}";
                         data = httpHelper.Post("http://intapi.253.com/send/json", data, System.Text.Encoding.UTF8,1);
                         JObject Jodata = JObject.Parse(data);
                         if (string.IsNullOrEmpty(Jodata["error"].ToString()))
@@ -212,7 +212,7 @@ namespace NEL_Agency_API.Controllers
                             //把验证码存入数据库
                             BsonDocument B = new BsonDocument();
                             B.Add("Date", DateTime.Now);
-                            //B.Add("timestamp", timestamp);
+                            B.Add("timestamp", timestamp);
                             B.Add("phone", phone);
                             B.Add("authcode", authcode);
                             mh.DeleteData(mongodbConnStr, mongodbDatabase, "authcode", findFliter);
