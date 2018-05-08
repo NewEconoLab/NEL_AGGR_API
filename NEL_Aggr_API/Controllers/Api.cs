@@ -82,12 +82,8 @@ namespace NEL_Agency_API.Controllers
                         result = mh.GetData(mongodbConnStr, mongodbDatabase, "nns", findFliter);
                         break;
                     case "delnnsinfo":
-                        address = req.@params[0].ToString();
-                        var domain = req.@params[1].ToString();
-                        if (address != null && address != string.Empty)
-                        {
-                            findFliter = "{addr:\"" + address + "\"name:\""+ domain + "\"}";
-                        }
+                        var domain = req.@params[0].ToString();
+                        findFliter = "{\"name:\"" + domain + "\"}";
                         result = getJAbyKV("result", mh.DeleteData(mongodbConnStr, mongodbDatabase, "nns", findFliter));
                         break;
                     case "getaddresstxs":
@@ -226,7 +222,92 @@ namespace NEL_Agency_API.Controllers
                         findFliter = "{phone:\"" + phone + "\",authcode:\""+ authcode + "\"}";
                         result = getJAbyKV("result",mh.GetData(mongodbConnStr, mongodbDatabase, "authcode", findFliter));
                         break;
+                    case "applyfornnc":
+                        var firstName = req.@params[0].ToString();
+                        var lastName = req.@params[1].ToString();
+                        var country = req.@params[2].ToString();
+                        var str_type = req.@params[3].ToString();
+                        var idNumber = req.@params[4].ToString();
+                        var passportNumber = req.@params[5].ToString();
+                        var passportPicture = req.@params[6].ToString();
+                        var email = req.@params[7].ToString();
+                        var mobileNumber = req.@params[8].ToString();
+                        var walletAddress = req.@params[9].ToString();
 
+
+                        //判断email是否已经注册过
+                        if (!string.IsNullOrEmpty(email))
+                        {
+                            findFliter = "{email:\"" + email+ "\"}";
+                            if (mh.GetDataCount(mongodbConnStr, mongodbDatabase, "applyfornnc", findFliter) > 0)
+                            {
+                                result = getJAbyKV("result", "email used");
+                                break;
+                            }
+                        }
+                        //判断mobileNumber是否已经注册过
+                        if (!string.IsNullOrEmpty(mobileNumber))
+                        {
+                            findFliter = "{mobileNumber:\"" + mobileNumber + "\"}";
+                            if (mh.GetDataCount(mongodbConnStr, mongodbDatabase, "applyfornnc", findFliter) > 0)
+                            {
+                                result = getJAbyKV("result", "mobileNumber used");
+                                break;
+                            }
+                        }
+                        //判断walletAddress是否已经注册过
+                        if (!string.IsNullOrEmpty(walletAddress))
+                        {
+                            findFliter = "{walletAddress:\"" + walletAddress + "\"}";
+                            if (mh.GetDataCount(mongodbConnStr, mongodbDatabase, "applyfornnc", findFliter) > 0)
+                            {
+                                result = getJAbyKV("result", "walletAddress used");
+                                break;
+                            }
+                        }
+                        //如果有为空的就返回错误
+                        if (string.IsNullOrEmpty(firstName) || 
+                            string.IsNullOrEmpty(lastName) || 
+                            string.IsNullOrEmpty(country) || 
+                            string.IsNullOrEmpty(str_type) ||  
+                            string.IsNullOrEmpty(passportPicture) || 
+                            string.IsNullOrEmpty(email) || 
+                            string.IsNullOrEmpty(mobileNumber) ||
+                            string.IsNullOrEmpty(walletAddress))
+                        {
+                            result = getJAbyKV("result", "params cant be none");
+                            break;
+                        }
+
+                        if (string.IsNullOrEmpty(idNumber) && string.IsNullOrEmpty(passportNumber))
+                        {
+                            result = getJAbyKV("result", "params cant be none");
+                            break;
+                        }
+
+                        var files = Convert.FromBase64String(req.@params[6].ToString());
+
+                        var bytes_walletAddress = ThinNeo.Helper.HexString2Bytes(walletAddress);
+                        var hash = ThinNeo.Helper.Sha256(bytes_walletAddress, 0, bytes_walletAddress.Length);
+                        var hashstr = ThinNeo.Helper.Bytes2HexString(hash);
+
+                        System.IO.File.WriteAllBytes(@"E:\ftp/"+ hashstr+".png", files);
+
+                        BsonDocument Bson = new BsonDocument();
+                        Bson.Add("firstName", firstName);
+                        Bson.Add("lastName", lastName);
+                        Bson.Add("country", country);
+                        Bson.Add("str_type", str_type);
+                        Bson.Add("idNumber", idNumber);
+                        Bson.Add("passportNumber", passportNumber);
+                        Bson.Add("passportPicture", hashstr);
+                        Bson.Add("email", email);
+                        Bson.Add("mobileNumber", mobileNumber);
+                        Bson.Add("walletAddress", walletAddress);
+                        
+
+                        result = getJAbyKV("result", mh.InsertOneData(mongodbConnStr, mongodbDatabase, "applyfornnc", Bson));
+                        break;
                 }
                 if (result.Count == 0)
                 {
