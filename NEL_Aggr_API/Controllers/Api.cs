@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Bson;
+using System.Security.Cryptography;
 
 namespace NEL_Agency_API.Controllers
 {
@@ -83,7 +84,7 @@ namespace NEL_Agency_API.Controllers
                         break;
                     case "delnnsinfo":
                         var domain = req.@params[0].ToString();
-                        findFliter = "{\"name:\"" + domain + "\"}";
+                        findFliter = "{name:\"" + domain + "\"}";
                         result = getJAbyKV("result", mh.DeleteData(mongodbConnStr, mongodbDatabase, "nns", findFliter));
                         break;
                     case "getaddresstxs":
@@ -119,11 +120,20 @@ namespace NEL_Agency_API.Controllers
                         result = JAresult;
                         break;
                     case "gettransbyaddress":
-                        sortStr = "{'blockindex':-1,'txid':-1}";
+                        sortStr = "{\"blockindex\":-1,\"txid\":-1}";
                         findFliter = "{addr:\"" + req.@params[0].ToString() + "\"}";
                         result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "address_tx", sortStr, int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), findFliter);
                         break;
                     case "getrankbyasset":
+                        /*
+                        var asset = req.@params[0].ToString();
+                        var count = int.Parse(req.@params[1].ToString());
+                        var page = int.Parse(req.@params[2].ToString());
+                        sortStr = "{\"balance\":-1}";
+                        findFliter = "{asset:\"" + req.@params[0].ToString() + "\"}";
+                        result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "allAssetRank", sortStr, int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), findFliter);
+                        break;
+                        */
                         var count = int.Parse(req.@params[1].ToString());
                         var page = int.Parse(req.@params[2].ToString());
                         url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getnep5transfersbyasset", out postdata, new MyJson.JsonNode_ValueString(req.@params[0].ToString()));
@@ -139,7 +149,7 @@ namespace NEL_Agency_API.Controllers
                                 }
                                 else
                                 {
-                                    dic[joresult["from"].ToString()] =-(decimal)joresult["value"];
+                                    dic[joresult["from"].ToString()] = -(decimal)joresult["value"];
                                 }
                             }
                             if (!string.IsNullOrEmpty(joresult["to"].ToString()))
@@ -170,7 +180,7 @@ namespace NEL_Agency_API.Controllers
                             j[key.Key] = dic[key.Key];
                             result.Add(j);
                         }
-                        var result_ = result.Skip((page-1)*count).Take(count).ToArray();
+                        var result_ = result.Skip((page - 1) * count).Take(count).ToArray();
                         result = new JArray();
                         foreach (var i in result_)
                         {
@@ -233,7 +243,25 @@ namespace NEL_Agency_API.Controllers
                         var email = req.@params[7].ToString();
                         var mobileNumber = req.@params[8].ToString();
                         var walletAddress = req.@params[9].ToString();
+                        var targetwalletAddress = req.@params[10].ToString();
 
+                        //判断钱包地址的审核状态
+                        if (!string.IsNullOrEmpty(walletAddress)) 
+                        {
+                            findFliter = "{walletAddress:\"" + walletAddress + "\"}";
+                            if (mh.GetDataCount(mongodbConnStr, mongodbDatabase, "applyfornnc", findFliter) > 0)
+                            {
+                                JArray JA_applyfornnc = mh.GetData(mongodbConnStr, mongodbDatabase, "applyfornnc", findFliter);
+                                if (JA_applyfornnc.Count > 0)
+                                {
+                                    result = getJAbyKV("result", JA_applyfornnc[0]["state"]);
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                            }
+                        }
 
                         //判断email是否已经注册过
                         if (!string.IsNullOrEmpty(email))
@@ -255,13 +283,13 @@ namespace NEL_Agency_API.Controllers
                                 break;
                             }
                         }
-                        //判断walletAddress是否已经注册过
-                        if (!string.IsNullOrEmpty(walletAddress))
+                        //判断targetwalletAddress是否已经注册过
+                        if (!string.IsNullOrEmpty(targetwalletAddress))
                         {
-                            findFliter = "{walletAddress:\"" + walletAddress + "\"}";
+                            findFliter = "{targetwalletAddress:\"" + targetwalletAddress + "\"}";
                             if (mh.GetDataCount(mongodbConnStr, mongodbDatabase, "applyfornnc", findFliter) > 0)
                             {
-                                result = getJAbyKV("result", "walletAddress used");
+                                result = getJAbyKV("result", "targetwalletAddress used");
                                 break;
                             }
                         }
@@ -287,9 +315,18 @@ namespace NEL_Agency_API.Controllers
 
                         var files = Convert.FromBase64String(req.@params[6].ToString());
 
-                        var bytes_walletAddress = ThinNeo.Helper.HexString2Bytes(walletAddress);
-                        var hash = ThinNeo.Helper.Sha256(bytes_walletAddress, 0, bytes_walletAddress.Length);
-                        var hashstr = ThinNeo.Helper.Bytes2HexString(hash);
+                        var hashstr = "";
+                        try
+                        {
+                            var bytes_walletAddress = ThinNeo.Helper.GetPublicKeyHashFromAddress(walletAddress);
+                            var hash = ThinNeo.Helper.Sha256(bytes_walletAddress);
+                            hashstr = ThinNeo.Helper.Bytes2HexString(hash);
+                        }
+                        catch (Exception e)
+                        {
+                            result = getJAbyKV("result", "address is error");
+                            break;
+                        }
 
                         System.IO.File.WriteAllBytes(@"E:\ftp/"+ hashstr+".png", files);
 
@@ -304,9 +341,64 @@ namespace NEL_Agency_API.Controllers
                         Bson.Add("email", email);
                         Bson.Add("mobileNumber", mobileNumber);
                         Bson.Add("walletAddress", walletAddress);
-                        
+                        Bson.Add("targetwalletAddress", targetwalletAddress);
+                        Bson.Add("state", 2);
+                        Bson.Add("commitTime", (DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000);
+                        Bson.Add("checkTime",0);
+
 
                         result = getJAbyKV("result", mh.InsertOneData(mongodbConnStr, mongodbDatabase, "applyfornnc", Bson));
+                        break;
+                    case "login":
+                        var user = req.@params[0].ToString();
+                        var password = req.@params[1].ToString();
+                        findFliter = "{user:\""+ user + "\",password:\""+password+"\"}";
+                        var datacount = mh.GetDataCount(mongodbConnStr, mongodbDatabase, "manager", findFliter);
+                        if (datacount <= 0)
+                            result = getJAbyKV("result", 401);
+                        else
+                        {
+                            var randon = RandomNumberGenerator.Create();
+                            var b = new byte[12] ;
+                            for (var i = 0; i < 12; i++)
+                            {
+                                b[i] = 1;
+                            }
+                            randon.GetBytes(b);
+                            var str_b = ThinNeo.Helper.Base58CheckEncode(b);
+                            findFliter = "{user:\"" + user + "\",password:\"" + password + "\",token:\""+ str_b + "\"}";
+                            mh.ReplaceData(mongodbConnStr, mongodbDatabase, "manager", "{user:\"" + user + "\",password:\"" + password + "\"}", findFliter);
+                            result = getJAbyKV("result", str_b);
+                        }
+                        break;
+                    case "getapplyfornnc":
+                        sortStr = "{}";
+                        findFliter = "{}";
+                        result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "applyfornnc", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()), findFliter);
+                        break;
+                    case "checkapplyfornnc":
+                        user = req.@params[0].ToString();
+                        var token = req.@params[1].ToString();
+                        walletAddress = req.@params[2].ToString();
+                        var state = (Int64)req.@params[3];
+                        //验证管理员
+                        findFliter = "{user:\"" + user + "\",token:\"" + token + "\"}";
+                        datacount = mh.GetDataCount(mongodbConnStr, mongodbDatabase, "manager", findFliter);
+                        if (datacount <= 0)
+                            result = getJAbyKV("result", 401);
+                        else
+                        {
+                            findFliter = "{walletAddress:\"" + walletAddress + "\"}";
+                            JObject JO_applyfornnc = (JObject)mh.GetData(mongodbConnStr, mongodbDatabase, "applyfornnc", findFliter)[0];
+                            JO_applyfornnc["state"] = state;
+                            JO_applyfornnc["checkTime"] = (DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000;
+                            result = getJAbyKV("result", mh.ReplaceData(mongodbConnStr, mongodbDatabase, "applyfornnc", "{walletAddress:\"" + walletAddress + "\"}", JO_applyfornnc.ToString()));
+                        }
+                        break;
+                    case "getpicture":
+                        hashstr = req.@params[0].ToString();
+                        files = System.IO.File.ReadAllBytes(@"E:\ftp/" + hashstr + ".png");
+                        result = getJAbyKV("result", Convert.ToBase64String(files));
                         break;
                 }
                 if (result.Count == 0)

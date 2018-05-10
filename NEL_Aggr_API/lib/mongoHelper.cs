@@ -268,5 +268,34 @@ namespace NEL_Agency_API.lib
 
             return totalSysFee;
         }
+
+        public string ReplaceData(string mongodbConnStr, string mongodbDatabase, string collName, string whereFliter, string replaceFliter)
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>(collName);
+            try
+            {
+                List<BsonDocument> query = collection.Find(whereFliter).ToList();
+                if (query.Count > 0)
+                {
+                    collection.ReplaceOne(BsonDocument.Parse(whereFliter), BsonDocument.Parse(replaceFliter));
+                    client = null;
+                    return "suc";
+                }
+                else
+                {
+                    client = null;
+                    return "no data";
+                }
+            }
+            catch (Exception e)
+            {
+                client = null;
+                return e.ToString();
+            }
+
+
+        }
     }
 }
