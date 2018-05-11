@@ -125,7 +125,6 @@ namespace NEL_Agency_API.Controllers
                         result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "address_tx", sortStr, int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), findFliter);
                         break;
                     case "getrankbyasset":
-                        /*
                         var asset = req.@params[0].ToString();
                         var count = int.Parse(req.@params[1].ToString());
                         var page = int.Parse(req.@params[2].ToString());
@@ -133,66 +132,8 @@ namespace NEL_Agency_API.Controllers
                         findFliter = "{asset:\"" + req.@params[0].ToString() + "\"}";
                         result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "allAssetRank", sortStr, int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), findFliter);
                         break;
-                        */
-                        var count = int.Parse(req.@params[1].ToString());
-                        var page = int.Parse(req.@params[2].ToString());
-                        url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getnep5transfersbyasset", out postdata, new MyJson.JsonNode_ValueString(req.@params[0].ToString()));
-                        JAresult = (JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"];
-                        Dictionary<string, decimal> dic = new Dictionary<string, decimal>();
-                        foreach (JObject joresult in JAresult)
-                        {
-                            if (!string.IsNullOrEmpty(joresult["from"].ToString()))
-                            {
-                                if (dic.ContainsKey(joresult["from"].ToString()))
-                                {
-                                    dic[joresult["from"].ToString()] = (decimal)dic[joresult["from"].ToString()] - (decimal)joresult["value"];
-                                }
-                                else
-                                {
-                                    dic[joresult["from"].ToString()] = -(decimal)joresult["value"];
-                                }
-                            }
-                            if (!string.IsNullOrEmpty(joresult["to"].ToString()))
-                            {
-                                if (dic.ContainsKey(joresult["to"].ToString()))
-                                {
-                                    dic[joresult["to"].ToString()] = (decimal)dic[joresult["to"].ToString()] + (decimal)joresult["value"];
-                                }
-                                else
-                                {
-                                    dic[joresult["to"].ToString()] = +(decimal)joresult["value"];
-                                }
-                            }
-                        }
-                        var dic2 = dic.ToList();
-                        dic2.Sort((a, b) =>
-                        {
-                            if (a.Value > b.Value)
-                                return -1;
-                            else if (a.Value < b.Value)
-                                return 1;
-                            else
-                                return 0;
-                        });
-                        foreach (var key in dic2)
-                        {
-                            JObject j = new JObject();
-                            j[key.Key] = dic[key.Key];
-                            result.Add(j);
-                        }
-                        var result_ = result.Skip((page - 1) * count).Take(count).ToArray();
-                        result = new JArray();
-                        foreach (var i in result_)
-                        {
-                            result.Add(i);
-                        }
-                        break;
-                    case "rankbyassetcount":
-
-                        break;
                     case "sendauthcode":
                         var phone = req.@params[0].ToString();
-
                         //防止频发发送
                         long timestamp = (DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000;
                         
@@ -306,7 +247,7 @@ namespace NEL_Agency_API.Controllers
                             result = getJAbyKV("result", "params cant be none");
                             break;
                         }
-
+                        //必须有一个有值
                         if (string.IsNullOrEmpty(idNumber) && string.IsNullOrEmpty(passportNumber))
                         {
                             result = getJAbyKV("result", "params cant be none");
