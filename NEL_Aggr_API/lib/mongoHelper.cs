@@ -16,10 +16,14 @@ namespace NEL_Agency_API.lib
         public string mongodbConnStr_testnet = string.Empty;
         public string mongodbDatabase_testnet = string.Empty;
         public string nelJsonRPCUrl_testnet = string.Empty;
+        public string notify_mongodbConnStr_testnet = string.Empty;
+        public string notify_mongodbDatabase_testnet = string.Empty;
 
         public string mongodbConnStr_mainnet = string.Empty;
         public string mongodbDatabase_mainnet = string.Empty;
         public string nelJsonRPCUrl_mainnet = string.Empty;
+        public string notify_mongodbConnStr_mainnet = string.Empty;
+        public string notify_mongodbDatabase_mainnet = string.Empty;
 
         public string mongodbConnStr_NeonOnline = string.Empty;
         public string mongodbDatabase_NeonOnline = string.Empty;
@@ -33,10 +37,14 @@ namespace NEL_Agency_API.lib
                 .Build();    //编译成对象  
             mongodbConnStr_testnet = config["mongodbConnStr_testnet"];
             mongodbDatabase_testnet = config["mongodbDatabase_testnet"];
+            notify_mongodbConnStr_testnet = config["notify_mongodbConnStr_testnet"];
+            notify_mongodbDatabase_testnet = config["notify_mongodbDatabase_testnet"];
             nelJsonRPCUrl_testnet = config["nelJsonRPCUrl_testnet"];
 
             mongodbConnStr_mainnet = config["mongodbConnStr_mainnet"];
             mongodbDatabase_mainnet = config["mongodbDatabase_mainnet"];
+            notify_mongodbConnStr_mainnet = config["notify_mongodbConnStr_mainnet"];
+            notify_mongodbDatabase_mainnet = config["notify_mongodbDatabase_mainnet"];
             nelJsonRPCUrl_mainnet = config["nelJsonRPCUrl_mainnet"];
 
             mongodbConnStr_NeonOnline = config["mongodbConnStr_NeonOnline"];

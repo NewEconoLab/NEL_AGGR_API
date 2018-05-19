@@ -16,6 +16,8 @@ namespace NEL_Agency_API.Controllers
         private string netnode { get; set; }
         private string mongodbConnStr { get; set; }
         private string mongodbDatabase { get; set; }
+        private string notify_mongodbConnStr { get; set; }
+        private string notify_mongodbDatabase { get; set; }
         private string nelJsonRPCUrl { get; set; }
 
         httpHelper hh = new httpHelper();
@@ -28,11 +30,15 @@ namespace NEL_Agency_API.Controllers
                 case "testnet":
                     mongodbConnStr = mh.mongodbConnStr_testnet;
                     mongodbDatabase = mh.mongodbDatabase_testnet;
+                    notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet;
+                    notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet;
                     nelJsonRPCUrl = mh.nelJsonRPCUrl_testnet;
                     break;
                 case "mainnet":
                     mongodbConnStr = mh.mongodbConnStr_mainnet;
                     mongodbDatabase = mh.mongodbDatabase_mainnet;
+                    notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet;
+                    notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet;
                     nelJsonRPCUrl = mh.nelJsonRPCUrl_mainnet;
                     break;
             }
@@ -132,6 +138,10 @@ namespace NEL_Agency_API.Controllers
                         findFliter = "{asset:\"" + req.@params[0].ToString() + "\"}";
                         result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "allAssetRank", sortStr, int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), findFliter);
                         break;
+                    case "getrankbyassetcount":
+                        findFliter = "{asset:\"" + req.@params[0].ToString() + "\"}";
+                        result = getJAbyKV("count", mh.GetDataCount(mongodbConnStr, mongodbDatabase, "allAssetRank", findFliter));
+                        break;
                     case "sendauthcode":
                         var phone = req.@params[0].ToString();
                         //防止频发发送
@@ -151,7 +161,7 @@ namespace NEL_Agency_API.Controllers
                         {
                             authcode += rd.Next(10).ToString();
                         }
-                        var data = "{\"account\":\"I5676235\",\"password\":\"QFxy6lN2nua501\",\"mobile\":\""+ phone + "\",\"msg\":\"【NNS】 Your verification code is  "+authcode+"  Please enter it within 5 minutes. Thank you for your support to NNS. Wishing you a happy life!\"}";
+                        var data = "{\"account\":\"I5676235\",\"password\":\"QFxy6lN2nua501\",\"mobile\":\""+ phone + "\",\"msg\":\"[NNS] Your verification code is  "+authcode+"  Please enter it within 5 minutes. Thank you for your support to NNS.\"}";
                         data = httpHelper.Post("http://intapi.253.com/send/json", data, System.Text.Encoding.UTF8,1);
                         JObject Jodata = JObject.Parse(data);
                         if (string.IsNullOrEmpty(Jodata["error"].ToString()))
@@ -185,7 +195,8 @@ namespace NEL_Agency_API.Controllers
                         var mobileNumber = req.@params[8].ToString();
                         var walletAddress = req.@params[9].ToString();
                         var targetwalletAddress = req.@params[10].ToString();
-
+                        var isbuttonclick = req.@params[11].ToString();
+                        authcode = req.@params[12].ToString();
                         //判断钱包地址的审核状态
                         if (!string.IsNullOrEmpty(walletAddress)) 
                         {
@@ -234,6 +245,16 @@ namespace NEL_Agency_API.Controllers
                                 break;
                             }
                         }
+
+                        findFliter = "{phone:\"" + mobileNumber + "\",authcode:\"" + authcode + "\"}";
+                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "authcode", findFliter);
+                        if (result.Count <= 0)
+                        {
+                            result = getJAbyKV("result", "authcode error");
+                            break;
+                        }
+
+
                         //如果有为空的就返回错误
                         if (string.IsNullOrEmpty(firstName) || 
                             string.IsNullOrEmpty(lastName) || 
@@ -242,7 +263,9 @@ namespace NEL_Agency_API.Controllers
                             string.IsNullOrEmpty(passportPicture) || 
                             string.IsNullOrEmpty(email) || 
                             string.IsNullOrEmpty(mobileNumber) ||
-                            string.IsNullOrEmpty(walletAddress))
+                            string.IsNullOrEmpty(walletAddress)||
+                            string.IsNullOrEmpty(targetwalletAddress)||
+                            string.IsNullOrEmpty(isbuttonclick))
                         {
                             result = getJAbyKV("result", "params cant be none");
                             break;
@@ -253,7 +276,12 @@ namespace NEL_Agency_API.Controllers
                             result = getJAbyKV("result", "params cant be none");
                             break;
                         }
-
+                        //是要入数据库的
+                        if (isbuttonclick == "0")
+                        {
+                            result=getJAbyKV("result", "params ok");
+                            break;
+                        }
                         var files = Convert.FromBase64String(req.@params[6].ToString());
 
                         var hashstr = "";
@@ -312,10 +340,18 @@ namespace NEL_Agency_API.Controllers
                             result = getJAbyKV("result", str_b);
                         }
                         break;
+                    case "getapplyfornncbywalletAddress":
+                        walletAddress = req.@params[0].ToString();
+                        findFliter = "{walletAddress:\""+ walletAddress + "\"}";
+                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "applyfornnc",findFliter);
+                        break;
                     case "getapplyfornnc":
                         sortStr = "{}";
                         findFliter = "{}";
                         result = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "applyfornnc", sortStr, int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()), findFliter);
+                        break;
+                    case "getapplyfornnccount":
+                        result = getJAbyKV("count", mh.GetDataCount(mongodbConnStr, mongodbDatabase, "applyfornnc"));
                         break;
                     case "checkapplyfornnc":
                         user = req.@params[0].ToString();
@@ -340,6 +376,55 @@ namespace NEL_Agency_API.Controllers
                         hashstr = req.@params[0].ToString();
                         files = System.IO.File.ReadAllBytes(@"E:\ftp/" + hashstr + ".png");
                         result = getJAbyKV("result", Convert.ToBase64String(files));
+                        break;
+                    case "setcontractscript":
+                        string str_hash = (string)req.@params[0];
+                        string str_avm = (string)req.@params[1];
+                        string str_cs = (string)req.@params[2];
+                        MyJson.IJsonNode JO_map = (MyJson.IJsonNode)MyJson.Parse((string)req.@params[3]);
+                        MyJson.IJsonNode JO_abi = (MyJson.IJsonNode)MyJson.Parse((string)req.@params[4]);
+                        string pathScript = @"E:\contract/";
+                        if (System.IO.Directory.Exists(pathScript) == false)
+                            System.IO.Directory.CreateDirectory(pathScript);
+                        //把上传的几个文件都存到本地
+                        System.IO.File.WriteAllBytes(System.IO.Path.Combine(pathScript, str_hash + ".avm"),ThinNeo.Helper.HexString2Bytes(str_avm));
+                        System.IO.File.WriteAllText(System.IO.Path.Combine(pathScript, str_hash + ".cs"),Uri.UnescapeDataString(str_cs));
+                        System.IO.File.WriteAllText(System.IO.Path.Combine(pathScript, str_hash + ".map.json"), JO_map.ToString());
+                        System.IO.File.WriteAllText(System.IO.Path.Combine(pathScript, str_hash + ".abi.json"), JO_abi.ToString());
+                        result = getJAbyKV("result", "suc");
+                        break;
+                    case "getcontractscript":
+                        str_hash = (string)req.@params[0];
+                        str_avm = ThinNeo.Helper.Bytes2HexString(System.IO.File.ReadAllBytes(System.IO.Path.Combine(@"E:\contract/", str_hash + ".avm")));
+                        str_cs=System.IO.File.ReadAllText(System.IO.Path.Combine(@"E:\contract/", str_hash + ".cs"));
+                        JO_map = (MyJson.IJsonNode)MyJson.Parse(System.IO.File.ReadAllText(System.IO.Path.Combine(@"E:\contract/", str_hash + ".map.json")));
+                        JO_abi = (MyJson.IJsonNode)MyJson.Parse(System.IO.File.ReadAllText(System.IO.Path.Combine(@"E:\contract/", str_hash + ".abi.json")));
+                        JObject JO_result = new JObject();
+                        JO_result["avm"] = str_avm;
+                        JO_result["cs"] = Uri.EscapeDataString(str_cs);
+                        JO_result["map"] = JO_map.ToString();
+                        JO_result["abi"] = JO_abi.ToString();
+                        result = new JArray() { JO_result };
+                        break;
+                    case "getfulllog":
+                        url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getfulllog", out postdata, new MyJson.JsonNode_ValueString(req.@params[0].ToString()));
+                        JAresult = (JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"];
+                        result = JAresult;
+                        break;
+                    case "getdomainbyaddress":
+                        findFliter = "{owner:\""+ req.@params[0].ToString() + "\"}";
+                        result = mh.GetData(notify_mongodbConnStr,notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", findFliter);
+                        break;
+                    case "getdomainbyaddress2":
+                        findFliter = "{owner:\"" + req.@params[0].ToString() + "\"}";
+                        result = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", findFliter);
+                        MyJson.JsonNode_Object json = new MyJson.JsonNode_Object();
+                        foreach(var r in result)
+                        {
+                            json[r["domain"].ToString()] =new MyJson.JsonNode_ValueString(r["domain"].ToString());
+                        }
+                        var keys = json.Keys;
+                        result = new JArray(keys);
                         break;
                 }
                 if (result.Count == 0)
