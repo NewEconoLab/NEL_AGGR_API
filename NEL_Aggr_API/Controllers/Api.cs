@@ -246,14 +246,14 @@ namespace NEL_Agency_API.Controllers
                             }
                         }
 
-                        findFliter = "{phone:\"" + mobileNumber + "\",authcode:\"" + authcode + "\"}";
-                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "authcode", findFliter);
-                        if (result.Count <= 0)
-                        {
-                            result = getJAbyKV("result", "authcode error");
-                            break;
-                        }
-
+                        //findFliter = "{phone:\"" + mobileNumber + "\",authcode:\"" + authcode + "\"}";
+                        //result = mh.GetData(mongodbConnStr, mongodbDatabase, "authcode", findFliter);
+                        //if (result.Count <= 0)
+                        //{
+                        //    result = getJAbyKV("result", "authcode error");
+                        //    break;
+                        //}
+                        //
 
                         //如果有为空的就返回错误
                         if (string.IsNullOrEmpty(firstName) || 
