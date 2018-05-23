@@ -28,6 +28,10 @@ namespace NEL_Agency_API.lib
         public string mongodbConnStr_NeonOnline = string.Empty;
         public string mongodbDatabase_NeonOnline = string.Empty;
 
+       
+        public string queryDomainCollection = string.Empty;
+        public string queryTxidSetCollection = string.Empty;
+
 
         public mongoHelper() {
             var config = new ConfigurationBuilder()
@@ -49,6 +53,9 @@ namespace NEL_Agency_API.lib
 
             mongodbConnStr_NeonOnline = config["mongodbConnStr_NeonOnline"];
             mongodbDatabase_NeonOnline = config["mongodbDatabase_NeonOnline"];
+
+            queryDomainCollection = config["queryDomainCollection_testnet"];
+            queryTxidSetCollection = config["queryTxidSetCollection_testnet"];
         }
 
         public JArray GetData(string mongodbConnStr,string mongodbDatabase, string coll,string findFliter)
