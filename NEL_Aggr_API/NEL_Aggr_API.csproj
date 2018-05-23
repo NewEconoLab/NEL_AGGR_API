@@ -41,9 +41,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\llvm\llvm.csproj" />
-    <ProjectReference Include="..\thinSDK_neo\thinSDK_neo.csproj" />
-	  <ProjectReference Include="..\thinSDK\thinSDK.csproj" />
+    <Reference Include="llvm">
+      <HintPath>bin\Debug\netcoreapp2.0\llvm.dll</HintPath>
+    </Reference>
+    <Reference Include="thinSDK">
+      <HintPath>bin\Debug\netcoreapp2.0\thinSDK.dll</HintPath>
+    </Reference>
+    <Reference Include="thinSDK_neo">
+      <HintPath>bin\Debug\netcoreapp2.0\thinSDK_neo.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties Properties_4launchSettings_1json__JSONSchema="http://json.schemastore.org/project-1.0.0-beta6" /></VisualStudio></ProjectExtensions>
