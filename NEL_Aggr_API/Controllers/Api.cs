@@ -76,6 +76,86 @@ namespace NEL_Agency_API.Controllers
             {
                 switch (req.method)
                 {
+                    // 根据地址查询域名
+                    case "getdomainbyaddress":
+                        string queryDomainCol = mh.queryDomainCollection;
+                        string queryDomainAddr = "{\"owner\":\"" + req.@params[0] + "\"}";
+                        JArray queryDomainRes = mh.GetData(mh.notify_mongodbConnStr_testnet, mh.notify_mongodbDatabase_testnet, queryDomainCol, queryDomainAddr);
+
+                        // 域名列表
+                        List<JObject> domainList = new List<JObject>();
+                        foreach (var item in queryDomainRes)
+                        {
+                            // 全域名
+                            string fullDomain = null;   // 域名
+                            string resolver = null;     // 解析器Hex
+                            string resolverAddr = null;     // 解析器地址
+                            string ttl = null;      // 到期时间
+
+                            // 本域名
+                            string slfDomain = Convert.ToString(((JObject)item)["domain"]);
+                            fullDomain += slfDomain;
+
+                            // 父域名
+                            string parentDomain = "";
+                            string parentHash = Convert.ToString(((JObject)item)["parenthash"]);
+                            if (parentHash != "")
+                            {
+                                string queryNameHash = "{\"namehash\":\"" + parentHash + "\"}";
+                                JArray queryDomainResSub = mh.GetData(mh.notify_mongodbConnStr_testnet, mh.notify_mongodbDatabase_testnet, queryDomainCol, queryNameHash);
+                                foreach (var dd in queryDomainResSub)
+                                {
+                                    // 父域名只有一个
+                                    parentDomain += "." + Convert.ToString(((JObject)dd)["domain"]);
+                                    break;
+                                }
+                            }
+                            fullDomain += parentDomain;
+
+                            // 解析器、解析地址、过期时间
+                            resolver = Convert.ToString(((JObject)item)["resolver"]);
+                            resolverAddr = "";
+                            ttl = Convert.ToString(((JObject)item)["TTL"]);
+
+                            // filter: 过滤掉过期的且被他人再次使用的
+                            long expire = long.Parse(Convert.ToString(((JObject)item)["TTL"]));
+                            long nowtime = TimeHelper.GetTimeStamp();
+                            if (expire != 0 && expire < nowtime)
+                            {
+                                string filter = "{$and: [{\"domain\":\"" + slfDomain + "\"}" + "," + "{\"parenthash\":\"" + parentHash + "\"}" + "," + "{\"owner\":\"" + "{$not:" + req.@params[0] + "}" + "\"}" + "]}";
+                                JArray queryDomainResFilter = mh.GetData(mh.notify_mongodbConnStr_testnet, mh.notify_mongodbDatabase_testnet, queryDomainCol, filter);
+                                if (queryDomainResFilter != null && queryDomainResFilter.Count() > 0)
+                                {
+                                    continue;
+                                }
+                            }
+
+                            domainList.Add(new JObject { { "domain", fullDomain }, { "resolver", resolver }, { "resolverAddress", resolverAddr }, { "ttl", ttl } });
+                        }
+                        result = new JArray { domainList.ToArray() };
+                        break;
+
+                    // 根据地址查询txid列表
+                    case "gettxidsetbyaddress":
+                        string queryTxidSetCol = mh.queryTxidSetCollection;
+                        string queryTxidSetAddr = "{$or: [{\"from\":\"" + req.@params[0] + "\"}" + "," + "{\"to\":\"" + req.@params[0] + "\"}]}";
+                        JArray queryTxidSetRes = mh.GetData(mh.notify_mongodbConnStr_testnet, mh.notify_mongodbDatabase_testnet, queryTxidSetCol, queryTxidSetAddr);
+                        if (queryTxidSetRes == null || queryTxidSetRes.Count() == 0)
+                        {
+                            result = new JArray { };
+                            break;
+                        }
+
+                        // 交易编号列表
+                        List<string> txidList = new List<string>();
+                        foreach (var item in queryTxidSetRes)
+                        {
+                            var txid = ((JObject)item)["txid"];
+                            txidList.Add(Convert.ToString(txid));
+                        }
+                        result = new JArray { txidList.ToArray() };
+                        break;
+
                     case "setnnsinfo":
                         findFliter = "{addr:\"" + req.@params[0].ToString() + "\",name:\"" + req.@params[1].ToString() + "\",time:\"" + req.@params[2].ToString() + "\"}";
                         result = getJAbyKV("result",mh.InsertOneData(mongodbConnStr, mongodbDatabase, "nns", findFliter));
