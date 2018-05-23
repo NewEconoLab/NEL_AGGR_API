@@ -491,7 +491,7 @@ namespace NEL_Agency_API.Controllers
                         JAresult = (JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"];
                         result = JAresult;
                         break;
-                    case "getdomainbyaddress":
+                    case "getdomainbyaddress3":
                         findFliter = "{owner:\""+ req.@params[0].ToString() + "\"}";
                         result = mh.GetData(notify_mongodbConnStr,notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", findFliter);
                         break;
