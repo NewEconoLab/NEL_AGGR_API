@@ -186,6 +186,7 @@ namespace NEL_Agency_API.Controllers
                             
                              foreach (JObject jo in result)
                              {
+                                System.Threading.Thread.Sleep(100);
                                  url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata, new MyJson.JsonNode_ValueString(jo["txid"].ToString()));
                                  JObject JOresult = (JObject)((JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"])[0];
                                  
@@ -201,7 +202,7 @@ namespace NEL_Agency_API.Controllers
                                      string txid = vin["txid"].ToString();
                                      int n = (int)vin["vout"];
                                      url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata, new MyJson.JsonNode_ValueString(txid));
-
+                                    /*
                                     string ss = null;
                                     try
                                     {
@@ -210,21 +211,19 @@ namespace NEL_Agency_API.Controllers
                                     {
                                         ss = "httpPost.errMsg:" + e.Message;
                                     }
-                                    /*
-                                     JObject JOresult2 = (JObject)((JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"])[0];
-                                    
+                                    */
+                                    JObject JOresult2 = (JObject)((JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"])[0];
                                      Vin.Add((JObject)((JArray)JOresult2["vout"])[n]);
-                                     */
+                                     /*
                                     Vin.Add(new JObject { { "url", url } });
                                     Vin.Add(new JObject { { "postdata", postdata } });
                                     Vin.Add(new JObject { { "res", ss } });
                                     Vin.Add(new JObject { { "txid", txid } });
+                                    */
                                     break;
                                 }
                                 jo.Add("vin", Vin);
-                                jo.Add("debug", "breakpoint4");
-                                jo.Add("_vin", _Vin);
-                                break;
+                                //break;
                              }
                         } catch (Exception e)
                         {
