@@ -208,6 +208,8 @@ namespace NEL_Agency_API.Controllers
                                 
                                  foreach (JObject vin in _Vin)
                                  {
+
+                                    postdata = null;
                                      string txid = vin["txid"].ToString();
                                      int n = (int)vin["vout"];
                                      url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata, new MyJson.JsonNode_ValueString(txid));
