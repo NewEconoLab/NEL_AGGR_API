@@ -212,7 +212,14 @@ namespace NEL_Agency_API.Controllers
                                      int n = (int)vin["vout"];
                                      url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata, new MyJson.JsonNode_ValueString(txid));
 
-                                    string ss = httpHelper.HttpPost(url, postdata);
+                                    string ss = null;
+                                    try
+                                    {
+                                        ss = httpHelper.HttpPost(url, postdata);
+                                    } catch (Exception e)
+                                    {
+                                        ss = "httpPost.errMsg:" + e.Message;
+                                    }
                                     /*
                                      JObject JOresult2 = (JObject)((JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"])[0];
                                     
