@@ -204,7 +204,7 @@ namespace NEL_Agency_API.Controllers
                                  jo.Add("vout", Vout);
                                  JArray _Vin = (JArray)JOresult["vin"];
                                  JArray Vin = new JArray();
-                                result.Add(new JObject { { "step", "3" } });
+                                
                                 /*
                                  foreach (JObject vin in _Vin)
                                  {
