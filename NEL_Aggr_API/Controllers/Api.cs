@@ -68,8 +68,6 @@ namespace NEL_Agency_API.Controllers
 
         public object getRes(JsonRPCrequest req,string reqAddr)
         {
-            Logger.DebugLog("api.getRes start");
-            Logger.DebugLog("api.getRes start:"+req.method);
             JArray result = new JArray();
             string resultStr = string.Empty;
             string findFliter = string.Empty;
@@ -213,22 +211,15 @@ namespace NEL_Agency_API.Controllers
                                     }
                                     */
                                     JObject JOresult2 = (JObject)((JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"])[0];
-                                     Vin.Add((JObject)((JArray)JOresult2["vout"])[n]);
-                                     /*
-                                    Vin.Add(new JObject { { "url", url } });
-                                    Vin.Add(new JObject { { "postdata", postdata } });
-                                    Vin.Add(new JObject { { "res", ss } });
-                                    Vin.Add(new JObject { { "txid", txid } });
-                                    */
+                                    Vin.Add((JObject)((JArray)JOresult2["vout"])[n]);
                                     break;
                                 }
                                 jo.Add("vin", Vin);
-                                //break;
+                                break;
                              }
                         } catch (Exception e)
                         {
-                            Logger.ErrorLog(e);
-                            result = getJAbyKV("result", "debugInfo:"+e.Message);
+                            result = getJAbyKV("result", "errMsg:"+e.Message);
                         }
                         break;
                     case "getnep5transferbyaddress":
