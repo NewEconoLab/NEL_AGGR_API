@@ -46,6 +46,7 @@ namespace NEL_Agency_API.Controllers
         [HttpPost]
         public async Task<JsonResult> Post()
         {
+            Logger.DebugLog("TestNet.post start");
             try
             {
                 var ctype = HttpContext.Request.ContentType;
@@ -70,11 +71,13 @@ namespace NEL_Agency_API.Controllers
                 }
                 else// if (ctype == "application/json") 其他所有请求方式都这样取好了
                 {
+                    Logger.DebugLog("TestNet.post application/json");
                     var text = await LitServer.FormData.GetStringFromRequest(HttpContext.Request);
                     req = JsonConvert.DeserializeObject<JsonRPCrequest>(text);
                 }
 
                 string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+                Logger.DebugLog("TestNet.post call api.getRes");
                 return Json(api.getRes(req, ipAddr));
             }
             catch (Exception e)
