@@ -184,7 +184,7 @@ namespace NEL_Agency_API.Controllers
                             
                              foreach (JObject jo in result)
                              {
-                                 System.Threading.Thread.Sleep(1000);
+                                 System.Threading.Thread.Sleep(5000);
                                  url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata, new MyJson.JsonNode_ValueString(jo["txid"].ToString()));
                                  JObject JOresult = (JObject)((JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"])[0];
                                  
@@ -197,7 +197,7 @@ namespace NEL_Agency_API.Controllers
                                  
                                  foreach (JObject vin in _Vin)
                                  {
-                                    System.Threading.Thread.Sleep(1000);
+                                    System.Threading.Thread.Sleep(5000);
                                     string txid = vin["txid"].ToString();
                                     int n = (int)vin["vout"];
                                     url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata, new MyJson.JsonNode_ValueString(txid));
