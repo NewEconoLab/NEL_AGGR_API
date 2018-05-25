@@ -217,6 +217,7 @@ namespace NEL_Agency_API.Controllers
                                     
                                      Vin.Add((JObject)((JArray)JOresult2["vout"])[n]);
                                      */
+                                    Vin.Add(new JObject { { "url", url } });
                                 }
                                 jo.Add("vin", Vin);
                                 jo.Add("debug", "breakpoint4");
