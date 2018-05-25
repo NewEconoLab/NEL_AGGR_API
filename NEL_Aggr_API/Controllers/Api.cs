@@ -180,7 +180,6 @@ namespace NEL_Agency_API.Controllers
                         byte[] postdata;
                         string url;
                         result = getJAbyKV("result", "debugInfo:second");
-                        bool flag = true; if (flag) { break; }
 
                         //Logger.DebugLog("api.getRes getaddresstxs");
                         //Logger.DebugLog("api.getRes getaddresstxs:" + req.@params[0].ToString());
@@ -188,10 +187,11 @@ namespace NEL_Agency_API.Controllers
                         {
 
                             result = getJAbyKV("result", "debugInfo:first");
-                            /*
+                            
                             url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getaddresstxs", out postdata, new MyJson.JsonNode_ValueString(req.@params[0].ToString()), new MyJson.JsonNode_ValueNumber(int.Parse(req.@params[1].ToString())), new MyJson.JsonNode_ValueNumber(int.Parse(req.@params[2].ToString())));
                             result = (JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"];
                             bool flag = true; if(flag) { break; }
+                            /*
                             foreach (JObject jo in result)
                             {
                                 url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata, new MyJson.JsonNode_ValueString(jo["txid"].ToString()));
@@ -213,7 +213,8 @@ namespace NEL_Agency_API.Controllers
                                 jo.Add("vin", Vin);
                             }
                             */
-                        } catch (Exception e)
+                        }
+                        catch (Exception e)
                         {
                             Logger.ErrorLog(e);
                             result = getJAbyKV("result", "debugInfo:"+e.Message);
