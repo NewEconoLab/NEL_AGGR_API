@@ -184,7 +184,7 @@ namespace NEL_Agency_API.Controllers
                             
                              foreach (JObject jo in result)
                              {
-                                System.Threading.Thread.Sleep(100);
+                                System.Threading.Thread.Sleep(500);
                                  url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata, new MyJson.JsonNode_ValueString(jo["txid"].ToString()));
                                  JObject JOresult = (JObject)((JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"])[0];
                                  
@@ -215,7 +215,7 @@ namespace NEL_Agency_API.Controllers
                                     break;
                                 }
                                 jo.Add("vin", Vin);
-                                break;
+                                //break;
                              }
                         } catch (Exception e)
                         {
