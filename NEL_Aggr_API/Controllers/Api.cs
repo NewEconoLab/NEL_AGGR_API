@@ -219,8 +219,8 @@ namespace NEL_Agency_API.Controllers
                                      */
                                 }
                                 jo.Add("vin", Vin);
-                                jo.Add("debug", "breakpoint3");
-                                jo.Add(_Vin);
+                                jo.Add("debug", "breakpoint4");
+                                jo.Add("_vin", _Vin);
 
                             }
 
