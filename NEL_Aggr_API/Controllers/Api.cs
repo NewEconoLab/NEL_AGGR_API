@@ -231,6 +231,7 @@ namespace NEL_Agency_API.Controllers
                                     Vin.Add(new JObject { { "postdata", postdata } });
                                     Vin.Add(new JObject { { "res", ss } });
                                     Vin.Add(new JObject { { "txid", txid } });
+                                    break;
 
                                 }
                                 jo.Add("vin", Vin);
