@@ -179,37 +179,25 @@ namespace NEL_Agency_API.Controllers
                         
                         byte[] postdata;
                         string url;
-                        result = getJAbyKV("result", "debugInfo:second");
-
-                        //Logger.DebugLog("api.getRes getaddresstxs");
-                        //Logger.DebugLog("api.getRes getaddresstxs:" + req.@params[0].ToString());
                         try
                         {
-
-                            result = getJAbyKV("result", "debugInfo:first");
-                            
                             url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getaddresstxs", out postdata, new MyJson.JsonNode_ValueString(req.@params[0].ToString()), new MyJson.JsonNode_ValueNumber(int.Parse(req.@params[1].ToString())), new MyJson.JsonNode_ValueNumber(int.Parse(req.@params[2].ToString())));
                             result = (JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"];
-                            //bool flag = true; if(flag) { break; }
                             
                              foreach (JObject jo in result)
                              {
                                  url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata, new MyJson.JsonNode_ValueString(jo["txid"].ToString()));
                                  JObject JOresult = (JObject)((JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"])[0];
-                                
-                                
+                                 
                                  string type = JOresult["type"].ToString();
                                  jo.Add("type", type);
                                  JArray Vout = (JArray)JOresult["vout"];
                                  jo.Add("vout", Vout);
                                  JArray _Vin = (JArray)JOresult["vin"];
                                  JArray Vin = new JArray();
-                                
-                                
+                                 
                                  foreach (JObject vin in _Vin)
                                  {
-
-                                    postdata = null;
                                      string txid = vin["txid"].ToString();
                                      int n = (int)vin["vout"];
                                      url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata, new MyJson.JsonNode_ValueString(txid));
@@ -232,17 +220,13 @@ namespace NEL_Agency_API.Controllers
                                     Vin.Add(new JObject { { "res", ss } });
                                     Vin.Add(new JObject { { "txid", txid } });
                                     break;
-
                                 }
                                 jo.Add("vin", Vin);
                                 jo.Add("debug", "breakpoint4");
                                 jo.Add("_vin", _Vin);
-
-                            }
-
-
-                            }
-                        catch (Exception e)
+                                break;
+                             }
+                        } catch (Exception e)
                         {
                             Logger.ErrorLog(e);
                             result = getJAbyKV("result", "debugInfo:"+e.Message);
