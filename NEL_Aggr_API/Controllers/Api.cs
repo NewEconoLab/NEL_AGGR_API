@@ -185,6 +185,7 @@ namespace NEL_Agency_API.Controllers
                             
                             url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getaddresstxs", out postdata, new MyJson.JsonNode_ValueString(req.@params[0].ToString()), new MyJson.JsonNode_ValueNumber(int.Parse(req.@params[1].ToString())), new MyJson.JsonNode_ValueNumber(int.Parse(req.@params[2].ToString())));
                             result = (JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"];
+                            bool flag = true; if(flag) { break; }
                             foreach (JObject jo in result)
                             {
                                 url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata, new MyJson.JsonNode_ValueString(jo["txid"].ToString()));
