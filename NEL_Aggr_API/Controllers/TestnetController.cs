@@ -82,7 +82,7 @@ namespace NEL_Agency_API.Controllers
             }
             catch (Exception e)
             {
-                return Json("{}");
+                return Json("{err:"+e.Message+"}");
             }
 
         }

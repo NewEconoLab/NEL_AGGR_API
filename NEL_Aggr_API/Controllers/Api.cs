@@ -176,10 +176,14 @@ namespace NEL_Agency_API.Controllers
                         result = getJAbyKV("result", mh.DeleteData(mongodbConnStr, mongodbDatabase, "nns", findFliter));
                         break;
                     case "getaddresstxs":
+                        
                         byte[] postdata;
                         string url;
-                        Logger.DebugLog("api.getRes getaddresstxs");
-                        Logger.DebugLog("api.getRes getaddresstxs:" + req.@params[0].ToString());
+                        result = getJAbyKV("result", "debugInfo:second");
+                        bool flag = true; if (flag) { break; }
+
+                        //Logger.DebugLog("api.getRes getaddresstxs");
+                        //Logger.DebugLog("api.getRes getaddresstxs:" + req.@params[0].ToString());
                         try
                         {
 
