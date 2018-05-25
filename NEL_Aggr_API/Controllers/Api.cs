@@ -196,13 +196,16 @@ namespace NEL_Agency_API.Controllers
                              {
                                  url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata, new MyJson.JsonNode_ValueString(jo["txid"].ToString()));
                                  JObject JOresult = (JObject)((JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"])[0];
-                                /*
+                                
+                                
                                  string type = JOresult["type"].ToString();
                                  jo.Add("type", type);
                                  JArray Vout = (JArray)JOresult["vout"];
                                  jo.Add("vout", Vout);
                                  JArray _Vin = (JArray)JOresult["vin"];
                                  JArray Vin = new JArray();
+                                result.Add(new JObject { { "step", "3" } });
+                                /*
                                  foreach (JObject vin in _Vin)
                                  {
                                      string txid = vin["txid"].ToString();
