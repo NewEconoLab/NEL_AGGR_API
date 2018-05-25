@@ -182,7 +182,9 @@ namespace NEL_Agency_API.Controllers
                         Logger.DebugLog("api.getRes getaddresstxs:" + req.@params[0].ToString());
                         try
                         {
-                            
+
+                            result = getJAbyKV("result", "debugInfo:first");
+                            /*
                             url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getaddresstxs", out postdata, new MyJson.JsonNode_ValueString(req.@params[0].ToString()), new MyJson.JsonNode_ValueNumber(int.Parse(req.@params[1].ToString())), new MyJson.JsonNode_ValueNumber(int.Parse(req.@params[2].ToString())));
                             result = (JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"];
                             bool flag = true; if(flag) { break; }
@@ -206,10 +208,11 @@ namespace NEL_Agency_API.Controllers
                                 }
                                 jo.Add("vin", Vin);
                             }
+                            */
                         } catch (Exception e)
                         {
                             Logger.ErrorLog(e);
-                            result = getJAbyKV("result", "debugInfo(ts):"+e.Message);
+                            result = getJAbyKV("result", "debugInfo:"+e.Message);
                         }
                         break;
                     case "getnep5transferbyaddress":
