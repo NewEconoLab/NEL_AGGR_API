@@ -10,7 +10,7 @@ namespace NEL_Agency_API.Controllers
     {
         public static void DebugLog(string msg)
         {
-            string FilePath = "/opt/DebugLog.txt";
+            string FilePath = "./DebugLog.txt";
             try
             {
                 if (File.Exists(FilePath))
@@ -38,7 +38,7 @@ namespace NEL_Agency_API.Controllers
 
         public static void ErrorLog(Exception ex)
         {
-            string FilePath = "/opt/ErrorLog.txt";
+            string FilePath = "./ErrorLog.txt";
 
             System.Text.StringBuilder msg = new System.Text.StringBuilder();
             msg.Append("*************************************** \n");
