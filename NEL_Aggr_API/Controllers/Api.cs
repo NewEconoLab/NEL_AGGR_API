@@ -184,7 +184,7 @@ namespace NEL_Agency_API.Controllers
                             
                              foreach (JObject jo in result)
                              {
-                                System.Threading.Thread.Sleep(500);
+                                 System.Threading.Thread.Sleep(1000);
                                  url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata, new MyJson.JsonNode_ValueString(jo["txid"].ToString()));
                                  JObject JOresult = (JObject)((JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"])[0];
                                  
@@ -197,23 +197,14 @@ namespace NEL_Agency_API.Controllers
                                  
                                  foreach (JObject vin in _Vin)
                                  {
-                                    System.Threading.Thread.Sleep(500);
+                                    System.Threading.Thread.Sleep(1000);
                                     string txid = vin["txid"].ToString();
-                                     int n = (int)vin["vout"];
-                                     url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata, new MyJson.JsonNode_ValueString(txid));
-                                    /*
-                                    string ss = null;
-                                    try
-                                    {
-                                        ss = httpHelper.HttpPost(url, postdata);
-                                    } catch (Exception e)
-                                    {
-                                        ss = "httpPost.errMsg:" + e.Message;
-                                    }
-                                    */
+                                    int n = (int)vin["vout"];
+                                    url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata, new MyJson.JsonNode_ValueString(txid));
+                                    
                                     JObject JOresult2 = (JObject)((JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"])[0];
                                     Vin.Add((JObject)((JArray)JOresult2["vout"])[n]);
-                                    break;
+                                    //break;
                                 }
                                 jo.Add("vin", Vin);
                                 //break;
