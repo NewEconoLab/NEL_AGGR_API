@@ -32,6 +32,11 @@ namespace NEL_Agency_API.lib
         public string queryDomainCollection = string.Empty;
         public string queryTxidSetCollection = string.Empty;
 
+        public string mongodbConnStrAtBlock_mainnet = string.Empty;
+        public string mongodbDatabaseAtBlock_mainnet = string.Empty;
+        public string mongodbConnStrAtBlock_testnet = string.Empty;
+        public string mongodbDatabaseAtBlock_testnet = string.Empty;
+
 
         public mongoHelper() {
             var config = new ConfigurationBuilder()
@@ -56,6 +61,12 @@ namespace NEL_Agency_API.lib
 
             queryDomainCollection = config["queryDomainCollection_testnet"];
             queryTxidSetCollection = config["queryTxidSetCollection_testnet"];
+
+            mongodbConnStrAtBlock_mainnet = config["mongodbConnStrAtBlock_mainnet"];
+            mongodbDatabaseAtBlock_mainnet = config["mongodbDatabaseAtBlock_mainnet"];
+            mongodbConnStrAtBlock_testnet = config["mongodbConnStrAtBlock_testnet"];
+            mongodbDatabaseAtBlock_testnet = config["mongodbDatabaseAtBlock_testnet"];
+
         }
 
         public JArray GetData(string mongodbConnStr,string mongodbDatabase, string coll,string findFliter)
@@ -312,5 +323,29 @@ namespace NEL_Agency_API.lib
 
 
         }
+
+
+        public JArray GetDataAtBlock(string mongodbConnStr, string mongodbDatabase, string coll, string findFliter)
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>(coll);
+
+            List<BsonDocument> query = collection.Find(BsonDocument.Parse(findFliter)).ToList();
+            client = null;
+
+            if (query.Count > 0)
+            {
+                var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+                JArray JA = JArray.Parse(query.ToJson(jsonWriterSettings));
+                foreach (JObject j in JA)
+                {
+                    j.Remove("_id");
+                }
+                return JA;
+            }
+            else { return new JArray(); }
+        }
+
     }
 }
