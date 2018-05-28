@@ -244,11 +244,8 @@ namespace NEL_Agency_API.Controllers
                                 {
                                     string txid = vin["txid"].ToString();
                                     int n = (int)vin["vout"];
-                                    //string filter = "{\"txid\":\"" + txid + "\"}";
-                                    string filter = "{txid:'" + txid + "'}"; 
-                                    string url_1 = "mongodb://nelDataStorage:NELqingmingzi1128@dds-bp1b36419665fdd41167-pub.mongodb.rds.aliyuncs.com:3717,dds-bp1b36419665fdd42489-pub.mongodb.rds.aliyuncs.com:3717/NeoBlockBaseData?replicaSet=mgset-4977005";
-                                    string url_2 = "NeoBlockBaseData";
-                                    JObject JOresult2 = (JObject)mh.GetDataAtBlock(url_1, url_2, "tx", filter)[0];
+                                    string filter = "{txid:'" + txid + "'}";
+                                    JObject JOresult2 = (JObject)mh.GetDataAtBlock(mongodbConnStrAtBlock, mongodbDatabaseAtBlock, "tx", filter)[0];
 
                                     Vin.Add((JObject)((JArray)JOresult2["vout"])[n]);
                                 }
