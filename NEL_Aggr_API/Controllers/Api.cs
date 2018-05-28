@@ -223,18 +223,15 @@ namespace NEL_Agency_API.Controllers
                         }
                         break;
                     case "getaddresstxs2":
-
-                        byte[] postdata2;
-                        string url2;
                         try
                         {
-                            url2 = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getaddresstxs", out postdata2, new MyJson.JsonNode_ValueString(req.@params[0].ToString()), new MyJson.JsonNode_ValueNumber(int.Parse(req.@params[1].ToString())), new MyJson.JsonNode_ValueNumber(int.Parse(req.@params[2].ToString())));
-                            result = (JArray)JObject.Parse(httpHelper.HttpPost(url2, postdata2))["result"];
+                            url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getaddresstxs", out postdata, new MyJson.JsonNode_ValueString(req.@params[0].ToString()), new MyJson.JsonNode_ValueNumber(int.Parse(req.@params[1].ToString())), new MyJson.JsonNode_ValueNumber(int.Parse(req.@params[2].ToString())));
+                            result = (JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"];
 
                             foreach (JObject jo in result)
                             {
-                                url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata2, new MyJson.JsonNode_ValueString(jo["txid"].ToString()));
-                                JObject JOresult = (JObject)((JArray)JObject.Parse(httpHelper.HttpPost(url, postdata2))["result"])[0];
+                                url = httpHelper.MakeRpcUrlPost(nelJsonRPCUrl, "getrawtransaction", out postdata, new MyJson.JsonNode_ValueString(jo["txid"].ToString()));
+                                JObject JOresult = (JObject)((JArray)JObject.Parse(httpHelper.HttpPost(url, postdata))["result"])[0];
 
                                 string type = JOresult["type"].ToString();
                                 jo.Add("type", type);
@@ -247,7 +244,8 @@ namespace NEL_Agency_API.Controllers
                                 {
                                     string txid = vin["txid"].ToString();
                                     int n = (int)vin["vout"];
-                                    string filter = "{\"txid\":\"" + txid + "\"}";
+                                    //string filter = "{\"txid\":\"" + txid + "\"}";
+                                    string filter = "{txid:'" + txid + "'}"; 
                                     string url_1 = "mongodb://nelDataStorage:NELqingmingzi1128@dds-bp1b36419665fdd41167-pub.mongodb.rds.aliyuncs.com:3717,dds-bp1b36419665fdd42489-pub.mongodb.rds.aliyuncs.com:3717/NeoBlockBaseData?replicaSet=mgset-4977005";
                                     string url_2 = "NeoBlockBaseData";
                                     JObject JOresult2 = (JObject)mh.GetDataAtBlock(url_1, url_2, "tx", filter)[0];
