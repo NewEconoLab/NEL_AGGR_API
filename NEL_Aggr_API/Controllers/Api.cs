@@ -22,6 +22,8 @@ namespace NEL_Agency_API.Controllers
         private string mongodbConnStrAtBlock { get; set; }
         private string mongodbDatabaseAtBlock { get; set; }
 
+        private OssFileService ossClient;
+
         httpHelper hh = new httpHelper();
         mongoHelper mh = new mongoHelper();
 
@@ -37,6 +39,7 @@ namespace NEL_Agency_API.Controllers
                     nelJsonRPCUrl = mh.nelJsonRPCUrl_testnet;
                     mongodbConnStrAtBlock = mh.mongodbConnStrAtBlock_testnet;
                     mongodbDatabaseAtBlock = mh.mongodbDatabaseAtBlock_testnet;
+                    ossClient = new OssFileService(mh.ossServiceUrl_testnet);
                     break;
                 case "mainnet":
                     mongodbConnStr = mh.mongodbConnStr_mainnet;
@@ -46,6 +49,7 @@ namespace NEL_Agency_API.Controllers
                     nelJsonRPCUrl = mh.nelJsonRPCUrl_mainnet;
                     mongodbConnStrAtBlock = mh.mongodbConnStrAtBlock_mainnet;
                     mongodbDatabaseAtBlock = mh.mongodbDatabaseAtBlock_mainnet;
+                    ossClient = new OssFileService(mh.ossServiceUrl_testnet);
                     break;
             }
         }
@@ -324,7 +328,7 @@ namespace NEL_Agency_API.Controllers
                         findFliter = "{phone:\"" + phone + "\",authcode:\""+ authcode + "\"}";
                         result = getJAbyKV("result",mh.GetData(mongodbConnStr, mongodbDatabase, "authcode", findFliter));
                         break;
-                    case "applyfornnc":
+                    case "applyfornncOld":
                         var firstName = req.@params[0].ToString();
                         var lastName = req.@params[1].ToString();
                         var country = req.@params[2].ToString();
@@ -459,6 +463,136 @@ namespace NEL_Agency_API.Controllers
 
                         result = getJAbyKV("result", mh.InsertOneData(mongodbConnStr, mongodbDatabase, "applyfornnc", Bson));
                         break;
+                    case "applyfornnc":
+                        firstName = req.@params[0].ToString();
+                        lastName = req.@params[1].ToString();
+                        country = req.@params[2].ToString();
+                        str_type = req.@params[3].ToString();
+                        idNumber = req.@params[4].ToString();
+                        passportNumber = req.@params[5].ToString();
+                        passportPicture = req.@params[6].ToString();
+                        email = req.@params[7].ToString();
+                        mobileNumber = req.@params[8].ToString();
+                        walletAddress = req.@params[9].ToString();
+                        targetwalletAddress = req.@params[10].ToString();
+                        isbuttonclick = req.@params[11].ToString();
+                        authcode = req.@params[12].ToString();
+                        //判断钱包地址的审核状态
+                        if (!string.IsNullOrEmpty(walletAddress))
+                        {
+                            findFliter = "{walletAddress:\"" + walletAddress + "\"}";
+                            if (mh.GetDataCount(mongodbConnStr, mongodbDatabase, "applyfornnc", findFliter) > 0)
+                            {
+                                JArray JA_applyfornnc = mh.GetData(mongodbConnStr, mongodbDatabase, "applyfornnc", findFliter);
+                                if (JA_applyfornnc.Count > 0)
+                                {
+                                    result = getJAbyKV("result", JA_applyfornnc[0]["state"]);
+                                    break;
+                                }
+                            }
+                        }
+
+                        //判断email是否已经注册过
+                        if (!string.IsNullOrEmpty(email))
+                        {
+                            findFliter = "{email:\"" + email + "\"}";
+                            if (mh.GetDataCount(mongodbConnStr, mongodbDatabase, "applyfornnc", findFliter) > 0)
+                            {
+                                result = getJAbyKV("result", "email used");
+                                break;
+                            }
+                        }
+                        //判断mobileNumber是否已经注册过
+                        if (!string.IsNullOrEmpty(mobileNumber))
+                        {
+                            findFliter = "{mobileNumber:\"" + mobileNumber + "\"}";
+                            if (mh.GetDataCount(mongodbConnStr, mongodbDatabase, "applyfornnc", findFliter) > 0)
+                            {
+                                result = getJAbyKV("result", "mobileNumber used");
+                                break;
+                            }
+                        }
+                        //判断targetwalletAddress是否已经注册过
+                        if (!string.IsNullOrEmpty(targetwalletAddress))
+                        {
+                            findFliter = "{targetwalletAddress:\"" + targetwalletAddress + "\"}";
+                            if (mh.GetDataCount(mongodbConnStr, mongodbDatabase, "applyfornnc", findFliter) > 0)
+                            {
+                                result = getJAbyKV("result", "targetwalletAddress used");
+                                break;
+                            }
+                        }
+
+                        //findFliter = "{phone:\"" + mobileNumber + "\",authcode:\"" + authcode + "\"}";
+                        //result = mh.GetData(mongodbConnStr, mongodbDatabase, "authcode", findFliter);
+                        //if (result.Count <= 0)
+                        //{
+                        //    result = getJAbyKV("result", "authcode error");
+                        //    break;
+                        //}
+                        //
+
+                        //如果有为空的就返回错误
+                        if (string.IsNullOrEmpty(firstName) ||
+                            string.IsNullOrEmpty(lastName) ||
+                            string.IsNullOrEmpty(country) ||
+                            string.IsNullOrEmpty(str_type) ||
+                            string.IsNullOrEmpty(passportPicture) ||
+                            string.IsNullOrEmpty(email) ||
+                            string.IsNullOrEmpty(mobileNumber) ||
+                            string.IsNullOrEmpty(walletAddress) ||
+                            string.IsNullOrEmpty(targetwalletAddress) ||
+                            string.IsNullOrEmpty(isbuttonclick))
+                        {
+                            result = getJAbyKV("result", "params cant be none");
+                            break;
+                        }
+                        //必须有一个有值
+                        if (string.IsNullOrEmpty(idNumber) && string.IsNullOrEmpty(passportNumber))
+                        {
+                            result = getJAbyKV("result", "params cant be none");
+                            break;
+                        }
+                        //是要入数据库的
+                        if (isbuttonclick == "0")
+                        {
+                            result = getJAbyKV("result", "params ok");
+                            break;
+                        }
+
+                        hashstr = "";
+                        try
+                        {
+                            var bytes_walletAddress = ThinNeo.Helper.GetPublicKeyHashFromAddress(walletAddress);
+                            var hash = ThinNeo.Helper.Sha256(bytes_walletAddress);
+                            hashstr = ThinNeo.Helper.Bytes2HexString(hash);
+                        }
+                        catch (Exception e)
+                        {
+                            result = getJAbyKV("result", "address is error");
+                            break;
+                        }
+
+                        //System.IO.File.WriteAllBytes(@"E:\ftp/" + hashstr + ".png", files);
+                        ossClient.OssFileUpload(hashstr + ".png", req.@params[6].ToString());
+
+                        Bson = new BsonDocument();
+                        Bson.Add("firstName", firstName);
+                        Bson.Add("lastName", lastName);
+                        Bson.Add("country", country);
+                        Bson.Add("str_type", str_type);
+                        Bson.Add("idNumber", idNumber);
+                        Bson.Add("passportNumber", passportNumber);
+                        Bson.Add("passportPicture", hashstr);
+                        Bson.Add("email", email);
+                        Bson.Add("mobileNumber", mobileNumber);
+                        Bson.Add("walletAddress", walletAddress);
+                        Bson.Add("targetwalletAddress", targetwalletAddress);
+                        Bson.Add("state", 2);
+                        Bson.Add("commitTime", (DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000);
+                        Bson.Add("checkTime", 0);
+                        result = getJAbyKV("result", mh.InsertOneData(mongodbConnStr, mongodbDatabase, "applyfornnc", Bson));
+                        break;
                     case "login":
                         var user = req.@params[0].ToString();
                         var password = req.@params[1].ToString();
@@ -513,12 +647,18 @@ namespace NEL_Agency_API.Controllers
                             result = getJAbyKV("result", mh.ReplaceData(mongodbConnStr, mongodbDatabase, "applyfornnc", "{walletAddress:\"" + walletAddress + "\"}", JO_applyfornnc.ToString()));
                         }
                         break;
-                    case "getpicture":
+                    case "getpictureOld":
                         hashstr = req.@params[0].ToString();
                         files = System.IO.File.ReadAllBytes(@"E:\ftp/" + hashstr + ".png");
                         result = getJAbyKV("result", Convert.ToBase64String(files));
                         break;
-                    case "setcontractscript":
+                    case "getpicture":
+                        hashstr = req.@params[0].ToString();
+                        //files = System.IO.File.ReadAllBytes(hashstr + ".png");
+                        //result = getJAbyKV("result", Convert.ToBase64String(files));
+                        result = getJAbyKV("result", ossClient.OssFileDownLoad(hashstr + ".png"));
+                        break;
+                    case "setcontractscriptOld":
                         string str_hash = (string)req.@params[0];
                         string str_avm = (string)req.@params[1];
                         string str_cs = (string)req.@params[2];
@@ -534,13 +674,42 @@ namespace NEL_Agency_API.Controllers
                         System.IO.File.WriteAllText(System.IO.Path.Combine(pathScript, str_hash + ".abi.json"), JO_abi.ToString());
                         result = getJAbyKV("result", "suc");
                         break;
-                    case "getcontractscript":
+                    case "setcontractscript":
+                        str_hash = (string)req.@params[0];
+                        str_avm = (string)req.@params[1];
+                        str_cs = (string)req.@params[2];
+                        JO_map = (MyJson.IJsonNode)MyJson.Parse((string)req.@params[3]);
+                        JO_abi = (MyJson.IJsonNode)MyJson.Parse((string)req.@params[4]);
+                        // 上传Oss
+                        pathScript = "";
+                        ossClient.OssFileUpload(System.IO.Path.Combine(pathScript, str_hash + ".avm"), str_avm);
+                        ossClient.OssFileUpload(System.IO.Path.Combine(pathScript, str_hash + ".cs"), Uri.UnescapeDataString(str_cs));
+                        ossClient.OssFileUpload(System.IO.Path.Combine(pathScript, str_hash + ".map.json"), JO_map.ToString());
+                        ossClient.OssFileUpload(System.IO.Path.Combine(pathScript, str_hash + ".abi.json"), JO_abi.ToString());
+                        result = getJAbyKV("result", "suc");
+                        break;
+                    case "getcontractscriptOld":
                         str_hash = (string)req.@params[0];
                         str_avm = ThinNeo.Helper.Bytes2HexString(System.IO.File.ReadAllBytes(System.IO.Path.Combine(@"E:\contract/", str_hash + ".avm")));
                         str_cs=System.IO.File.ReadAllText(System.IO.Path.Combine(@"E:\contract/", str_hash + ".cs"));
                         JO_map = (MyJson.IJsonNode)MyJson.Parse(System.IO.File.ReadAllText(System.IO.Path.Combine(@"E:\contract/", str_hash + ".map.json")));
                         JO_abi = (MyJson.IJsonNode)MyJson.Parse(System.IO.File.ReadAllText(System.IO.Path.Combine(@"E:\contract/", str_hash + ".abi.json")));
                         JObject JO_result = new JObject();
+                        JO_result["avm"] = str_avm;
+                        JO_result["cs"] = Uri.EscapeDataString(str_cs);
+                        JO_result["map"] = JO_map.ToString();
+                        JO_result["abi"] = JO_abi.ToString();
+                        result = new JArray() { JO_result };
+                        break;
+                    case "getcontractscript":
+                        str_hash = (string)req.@params[0];
+                        // 下载Oss
+                        pathScript = "";
+                        str_avm = ossClient.OssFileDownLoad(System.IO.Path.Combine(pathScript, str_hash + ".avm"));
+                        str_cs = ossClient.OssFileDownLoad(System.IO.Path.Combine(pathScript, str_hash + ".cs"));
+                        JO_map = (MyJson.IJsonNode)MyJson.Parse(ossClient.OssFileDownLoad(System.IO.Path.Combine(pathScript, str_hash + ".map.json")));
+                        JO_abi = (MyJson.IJsonNode)MyJson.Parse(ossClient.OssFileDownLoad(System.IO.Path.Combine(pathScript, str_hash + ".abi.json")));
+                        JO_result = new JObject();
                         JO_result["avm"] = str_avm;
                         JO_result["cs"] = Uri.EscapeDataString(str_cs);
                         JO_result["map"] = JO_map.ToString();

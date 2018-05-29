@@ -37,6 +37,9 @@ namespace NEL_Agency_API.lib
         public string mongodbConnStrAtBlock_testnet = string.Empty;
         public string mongodbDatabaseAtBlock_testnet = string.Empty;
 
+        public string ossServiceUrl_testnet = string.Empty;
+        public string ossServiceUrl_mainnet = string.Empty;
+
 
         public mongoHelper() {
             var config = new ConfigurationBuilder()
@@ -66,6 +69,9 @@ namespace NEL_Agency_API.lib
             mongodbDatabaseAtBlock_mainnet = config["mongodbDatabaseAtBlock_mainnet"];
             mongodbConnStrAtBlock_testnet = config["mongodbConnStrAtBlock_testnet"];
             mongodbDatabaseAtBlock_testnet = config["mongodbDatabaseAtBlock_testnet"];
+
+            ossServiceUrl_testnet = config["ossServiceUrl_testnet"];
+            ossServiceUrl_mainnet = config["ossServiceUrl_mainnet"];
 
         }
 
