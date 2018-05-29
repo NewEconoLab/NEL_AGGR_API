@@ -659,11 +659,11 @@ namespace NEL_Agency_API.Controllers
                         result = getJAbyKV("result", ossClient.OssFileDownLoad(hashstr + ".png"));
                         break;
                     case "setcontractscriptOld":
-                        string str_hash = (string)req.@params[0];
-                        string str_avm = (string)req.@params[1];
-                        string str_cs = (string)req.@params[2];
-                        MyJson.IJsonNode JO_map = (MyJson.IJsonNode)MyJson.Parse((string)req.@params[3]);
-                        MyJson.IJsonNode JO_abi = (MyJson.IJsonNode)MyJson.Parse((string)req.@params[4]);
+                        string str_hash = req.@params[0].ToString();
+                        string str_avm = req.@params[1].ToString();
+                        string str_cs = req.@params[2].ToString();
+                        MyJson.IJsonNode JO_map = (MyJson.IJsonNode)MyJson.Parse(req.@params[3].ToString());
+                        MyJson.IJsonNode JO_abi = (MyJson.IJsonNode)MyJson.Parse(req.@params[4].ToString());
                         string pathScript = @"E:\contract/";
                         if (System.IO.Directory.Exists(pathScript) == false)
                             System.IO.Directory.CreateDirectory(pathScript);
@@ -675,11 +675,11 @@ namespace NEL_Agency_API.Controllers
                         result = getJAbyKV("result", "suc");
                         break;
                     case "setcontractscript":
-                        str_hash = (string)req.@params[0];
-                        str_avm = (string)req.@params[1];
-                        str_cs = (string)req.@params[2];
-                        JO_map = (MyJson.IJsonNode)MyJson.Parse((string)req.@params[3]);
-                        JO_abi = (MyJson.IJsonNode)MyJson.Parse((string)req.@params[4]);
+                        str_hash = req.@params[0].ToString();
+                        str_avm = req.@params[1].ToString();
+                        str_cs = req.@params[2].ToString();
+                        JO_map = (MyJson.IJsonNode)MyJson.Parse(req.@params[3].ToString());
+                        JO_abi = (MyJson.IJsonNode)MyJson.Parse(req.@params[4].ToString());
                         // 上传Oss
                         pathScript = "";
                         ossClient.OssFileUpload(System.IO.Path.Combine(pathScript, str_hash + ".avm"), str_avm);
@@ -702,7 +702,7 @@ namespace NEL_Agency_API.Controllers
                         result = new JArray() { JO_result };
                         break;
                     case "getcontractscript":
-                        str_hash = (string)req.@params[0];
+                        str_hash = req.@params[0].ToString();
                         // 下载Oss
                         pathScript = "";
                         str_avm = ossClient.OssFileDownLoad(System.IO.Path.Combine(pathScript, str_hash + ".avm"));
