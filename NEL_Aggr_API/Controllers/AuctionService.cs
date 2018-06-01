@@ -193,7 +193,7 @@ namespace NEL_Agency_API.Controllers
             res.Add("auctionState", auctionState);
 
             // 更新出价总额
-            double maxPrice = queyBidDetailRes.Where(p => p["maxBuyer"].Equals(token["maxBuyer"])).Sum(p => double.Parse(Convert.ToString(p["maxPrice"])));
+            double maxPrice = queyBidDetailRes.Where(p => p["maxBuyer"].Equals(res["maxBuyer"])).Sum(p => double.Parse(Convert.ToString(p["maxPrice"])));
             res.Remove("maxPrice");
             res.Add("maxPrice", String.Format("{0:N8}", maxPrice));
             res.Remove("startBlockSelling");
