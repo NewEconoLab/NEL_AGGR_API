@@ -23,6 +23,7 @@ namespace NEL_Agency_API.Controllers
         private string mongodbDatabaseAtBlock { get; set; }
 
         private OssFileService ossClient;
+        private AuctionService auctionService;
 
         httpHelper hh = new httpHelper();
         mongoHelper mh = new mongoHelper();
@@ -40,6 +41,14 @@ namespace NEL_Agency_API.Controllers
                     mongodbConnStrAtBlock = mh.mongodbConnStrAtBlock_testnet;
                     mongodbDatabaseAtBlock = mh.mongodbDatabaseAtBlock_testnet;
                     ossClient = new OssFileService(mh.ossServiceUrl_testnet);
+                    auctionService = new AuctionService()
+                    {
+                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
+                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
+                        mh = mh,
+                        Block_mongodbConnStr = mh.mongodbConnStrAtBlock_testnet,
+                        Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_testnet
+                    };
                     break;
                 case "mainnet":
                     mongodbConnStr = mh.mongodbConnStr_mainnet;
@@ -49,7 +58,15 @@ namespace NEL_Agency_API.Controllers
                     nelJsonRPCUrl = mh.nelJsonRPCUrl_mainnet;
                     mongodbConnStrAtBlock = mh.mongodbConnStrAtBlock_mainnet;
                     mongodbDatabaseAtBlock = mh.mongodbDatabaseAtBlock_mainnet;
-                    ossClient = new OssFileService(mh.ossServiceUrl_testnet);
+                    ossClient = new OssFileService(mh.ossServiceUrl_mainnet);
+                    auctionService = new AuctionService()
+                    {
+                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
+                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
+                        mh = mh,
+                        Block_mongodbConnStr = mh.mongodbConnStrAtBlock_mainnet,
+                        Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_mainnet
+                    };
                     break;
             }
         }
@@ -86,11 +103,30 @@ namespace NEL_Agency_API.Controllers
             {
                 switch (req.method)
                 {
+                    // 根据地址查询竞拍域名列表
+                    case "getbidlistbyaddress":
+                        result = auctionService.getBidListByAddress(req.@params[0].ToString());
+                        break;
+                    // 根据域名查询域名竞拍详情
+                    case "getbiddetailbydomain":
+                        if(req.@params[1] == null || req.@params[1].Equals(""))
+                        {   // 返回全部
+                            result = auctionService.getBidDetailByDomain(req.@params[0].ToString());
+                        } else
+                        {   // 分页返回
+                            result = auctionService.getBidDetailByDomain(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
+                        }
+                        break;
+                    // 根据域名查询域名竞拍结果
+                    case "getbidresbydomain":
+                        result = auctionService.getBidResByDomain(req.@params[0].ToString());
+                        break;
+                        
                     // 根据地址查询域名
                     case "getdomainbyaddress":
                         string queryDomainCol = mh.queryDomainCollection;
                         string queryDomainAddr = "{\"owner\":\"" + req.@params[0] + "\"}";
-                        JArray queryDomainRes = mh.GetData(mh.notify_mongodbConnStr_testnet, mh.notify_mongodbDatabase_testnet, queryDomainCol, queryDomainAddr);
+                        JArray queryDomainRes = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, queryDomainCol, queryDomainAddr);
 
                         // 域名列表
                         List<JObject> domainList = new List<JObject>();
@@ -112,7 +148,7 @@ namespace NEL_Agency_API.Controllers
                             if (parentHash != "")
                             {
                                 string queryNameHash = "{\"namehash\":\"" + parentHash + "\"}";
-                                JArray queryDomainResSub = mh.GetData(mh.notify_mongodbConnStr_testnet, mh.notify_mongodbDatabase_testnet, queryDomainCol, queryNameHash);
+                                JArray queryDomainResSub = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, queryDomainCol, queryNameHash);
                                 foreach (var dd in queryDomainResSub)
                                 {
                                     // 父域名只有一个
@@ -133,7 +169,7 @@ namespace NEL_Agency_API.Controllers
                             if (expire != 0 && expire < nowtime)
                             {
                                 string filter = "{$and: [{\"domain\":\"" + slfDomain + "\"}" + "," + "{\"parenthash\":\"" + parentHash + "\"}" + "," + "{\"owner\":\"" + "{$not:" + req.@params[0] + "}" + "\"}" + "]}";
-                                JArray queryDomainResFilter = mh.GetData(mh.notify_mongodbConnStr_testnet, mh.notify_mongodbDatabase_testnet, queryDomainCol, filter);
+                                JArray queryDomainResFilter = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, queryDomainCol, filter);
                                 if (queryDomainResFilter != null && queryDomainResFilter.Count() > 0)
                                 {
                                     continue;
@@ -149,7 +185,7 @@ namespace NEL_Agency_API.Controllers
                     case "gettxidsetbyaddress":
                         string queryTxidSetCol = mh.queryTxidSetCollection;
                         string queryTxidSetAddr = "{$or: [{\"from\":\"" + req.@params[0] + "\"}" + "," + "{\"to\":\"" + req.@params[0] + "\"}]}";
-                        JArray queryTxidSetRes = mh.GetData(mh.notify_mongodbConnStr_testnet, mh.notify_mongodbDatabase_testnet, queryTxidSetCol, queryTxidSetAddr);
+                        JArray queryTxidSetRes = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, queryTxidSetCol, queryTxidSetAddr);
                         if (queryTxidSetRes == null || queryTxidSetRes.Count() == 0)
                         {
                             result = new JArray { };
