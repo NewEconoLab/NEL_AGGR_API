@@ -49,7 +49,7 @@ namespace NEL_Agency_API.Controllers
 
                 JObject obj = new JObject();
                 // 1. 域名
-                string fullDomain = getParentDomainByParentHash(item.parenthash) + item.domain; // 父域名 + 子域名
+                string fullDomain = item.domain + getParentDomainByParentHash(item.parenthash); // 父域名 + 子域名
                 obj.Add("domain", fullDomain);
 
                 // 2. 开标时间
@@ -85,7 +85,7 @@ namespace NEL_Agency_API.Controllers
                 }
                 else
                 {
-                    obj.Add("auctionSpentTime", "");
+                    obj.Add("auctionSpentTime", auctionSpentTime-THREE_DAY_SECONDS);
                 }
 
                 // 7.域名所有者(竞拍结束显示)根据子域名和父域名哈希查询(从第一个Coll中查询)
@@ -93,6 +93,9 @@ namespace NEL_Agency_API.Controllers
                 if (isEndAuction(blockHeightStrEd))
                 {
                     owner = getOwnerByDomainAndParentHash(item.domain, item.parenthash);
+                    auctionSpentTime = getBlockTimeByBlokcIndex(blockHeightStrEd)-startAuctionTime-THREE_DAY_SECONDS;
+                    obj.Remove("auctionSpentTime");
+                    obj.Add("auctionSpentTime", auctionSpentTime);
                 }
                 obj.Add("owner", owner);
 
@@ -214,7 +217,7 @@ namespace NEL_Agency_API.Controllers
                 foreach (var dd in queryDomainResSub)
                 {
                     // 父域名只有一个
-                    parentDomain += Convert.ToString(((JObject)dd)["domain"]) + ".";
+                    parentDomain += "."+Convert.ToString(((JObject)dd)["domain"]);
                     break;
                 }
             }
@@ -273,7 +276,7 @@ namespace NEL_Agency_API.Controllers
         }
         private bool isEndAuction(string blockHeightStrEd)
         {
-            return blockHeightStrEd != null && blockHeightStrEd.Equals("") && blockHeightStrEd.Equals("0");
+            return blockHeightStrEd != null && !blockHeightStrEd.Equals("") && !blockHeightStrEd.Equals("0");
         }
         private long getStartAuctionTime(string blockHeightStrSt)
         {
