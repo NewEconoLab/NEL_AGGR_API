@@ -46,11 +46,10 @@ namespace NEL_Agency_API.Controllers
                     token = g.OrderByDescending(c => c["blockindex"]).ToList()[0]
                 }).OrderByDescending(k => k.maxPrice).ToList();
                 JToken token = maxPriceList[0].token;
-                double currentPrice = maxPriceList.Where(p => p.maxBuyer.ToString().Equals(address)).First().maxPrice;
+                double mybidprice = maxPriceList.Where(p => p.maxBuyer.ToString().Equals(address)).First().maxPrice;
 
                 JObject obj = new JObject();
-                obj.Add("currentAddress", address);
-                obj.Add("currentPrice", String.Format("{0:N8}", currentPrice));
+                obj.Add("mybidprice", String.Format("{0:N8}", mybidprice));
 
                 // 1. 域名
                 string fullDomain = item.domain + getParentDomainByParentHash(item.parenthash); // 父域名 + 子域名
