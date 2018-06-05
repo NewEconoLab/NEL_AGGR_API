@@ -155,6 +155,8 @@ namespace NEL_Agency_API.Controllers
             {
                 listNew.AddRange(item);
             }
+            
+
             // 倒叙排列
             JObject[] res = listNew.OrderByDescending(p => p["addPriceTime"]).ToArray();
 
@@ -163,9 +165,12 @@ namespace NEL_Agency_API.Controllers
             {
                 int st = (pageNum - 1) * pageSize;
                 int ed = pageSize;
-                return new JArray() { res.Skip(st).Take(pageSize).ToArray(), new JObject() { { "sumCount", listNew.Count()} } };
+                res =  res.Skip(st).Take(pageSize).ToArray();
             }
-            return new JArray() { res, new JObject() { { "sumCount", listNew.Count() } } }; 
+            JObject rr = new JObject();
+            rr.Add("list", new JArray() { res });
+            rr.Add("count", listNew.Count);
+            return new JArray() { rr };
         }
 
         public JArray getBidResByDomain(string domain)
