@@ -39,15 +39,19 @@ namespace NEL_Agency_API.Controllers
                 JArray queyBidDetailRes = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", queyBidDetailFilter.ToString());
                 
                 // 按出价人分组并计算出价总额，然后选出最高出价人
-                var maxPriceItem = queyBidDetailRes.GroupBy(p => p["maxBuyer"], (k, g) => new
+                var maxPriceList = queyBidDetailRes.GroupBy(p => p["maxBuyer"], (k, g) => new
                 {
                     maxBuyer = k,
                     maxPrice = g.Sum(q => double.Parse(Convert.ToString(q["maxPrice"]))),
                     token = g.OrderByDescending(c => c["blockindex"]).ToList()[0]
-                }).OrderByDescending(k => k.maxPrice).ToList()[0];
-                JToken token = maxPriceItem.token;
+                }).OrderByDescending(k => k.maxPrice).ToList();
+                JToken token = maxPriceList[0].token;
+                double currentPrice = maxPriceList.Where(p => p.maxBuyer.ToString().Equals(address)).First().maxPrice;
 
                 JObject obj = new JObject();
+                obj.Add("currentAddress", address);
+                obj.Add("currentPrice", String.Format("{0:N8}", currentPrice));
+
                 // 1. 域名
                 string fullDomain = item.domain + getParentDomainByParentHash(item.parenthash); // 父域名 + 子域名
                 obj.Add("domain", fullDomain);
@@ -72,7 +76,7 @@ namespace NEL_Agency_API.Controllers
                 obj.Add("auctionState", auctionState);
 
                 // 4.竞拍最高价
-                obj.Add("maxPrice", String.Format("{0:N8}", maxPriceItem.maxPrice));
+                obj.Add("maxPrice", String.Format("{0:N8}", maxPriceList[0].maxPrice));
                 
                 // 5.竞拍最高价地址
                 string maxBuyer = Convert.ToString(token["maxBuyer"]);
