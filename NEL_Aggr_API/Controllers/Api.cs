@@ -124,9 +124,13 @@ namespace NEL_Agency_API.Controllers
                         
                     // 根据地址查询域名
                     case "getdomainbyaddress":
-                        string queryDomainCol = mh.queryDomainCollection;
                         string queryDomainAddr = "{\"owner\":\"" + req.@params[0] + "\"}";
-                        JArray queryDomainRes = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, queryDomainCol, queryDomainAddr);
+                        string queryFilterRoot = ".test";
+                        if (req.@params.Length > 1)
+                        {
+                            queryFilterRoot = req.@params[1].ToString();
+                        }
+                        JArray queryDomainRes = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", queryDomainAddr);
 
                         // 域名列表
                         List<JObject> domainList = new List<JObject>();
@@ -148,7 +152,7 @@ namespace NEL_Agency_API.Controllers
                             if (parentHash != "")
                             {
                                 string queryNameHash = "{\"namehash\":\"" + parentHash + "\"}";
-                                JArray queryDomainResSub = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, queryDomainCol, queryNameHash);
+                                JArray queryDomainResSub = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", queryNameHash);
                                 foreach (var dd in queryDomainResSub)
                                 {
                                     // 父域名只有一个
@@ -157,6 +161,10 @@ namespace NEL_Agency_API.Controllers
                                 }
                             }
                             fullDomain += parentDomain;
+                            if(!fullDomain.EndsWith(queryFilterRoot))
+                            {
+                                continue;
+                            }
 
                             // 解析器、解析地址、过期时间
                             resolver = Convert.ToString(((JObject)item)["resolver"]);
@@ -169,7 +177,7 @@ namespace NEL_Agency_API.Controllers
                             if (expire != 0 && expire < nowtime)
                             {
                                 string filter = "{$and: [{\"domain\":\"" + slfDomain + "\"}" + "," + "{\"parenthash\":\"" + parentHash + "\"}" + "," + "{\"owner\":\"" + "{$not:" + req.@params[0] + "}" + "\"}" + "]}";
-                                JArray queryDomainResFilter = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, queryDomainCol, filter);
+                                JArray queryDomainResFilter = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", filter);
                                 if (queryDomainResFilter != null && queryDomainResFilter.Count() > 0)
                                 {
                                     continue;
@@ -183,9 +191,8 @@ namespace NEL_Agency_API.Controllers
 
                     // 根据地址查询txid列表
                     case "gettxidsetbyaddress":
-                        string queryTxidSetCol = mh.queryTxidSetCollection;
                         string queryTxidSetAddr = "{$or: [{\"from\":\"" + req.@params[0] + "\"}" + "," + "{\"to\":\"" + req.@params[0] + "\"}]}";
-                        JArray queryTxidSetRes = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, queryTxidSetCol, queryTxidSetAddr);
+                        JArray queryTxidSetRes = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, "0x4ac464f84f50d3f902c2f0ca1658bfaa454ddfbf", queryTxidSetAddr);
                         if (queryTxidSetRes == null || queryTxidSetRes.Count() == 0)
                         {
                             result = new JArray { };
