@@ -103,13 +103,29 @@ namespace NEL_Agency_API.Controllers
             {
                 switch (req.method)
                 {
+                    // 根据地址查询竞拍域名列表(域名支持模糊匹配)
+                    case "searchdomainbyaddress":
+                        if (req.@params.Length < 3)
+                        {
+                            result = auctionService.getBidListByAddressLikeDomain(req.@params[0].ToString(), req.@params[1].ToString());
+                        } else
+                        {
+                            result = auctionService.getBidListByAddressLikeDomain(req.@params[0].ToString(), req.@params[1].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
+                        }
+                        break;
                     // 根据地址查询竞拍域名列表
                     case "getbidlistbyaddress":
-                        result = auctionService.getBidListByAddress(req.@params[0].ToString());
+                        if(req.@params.Length < 2)
+                        {
+                            result = auctionService.getBidListByAddress(req.@params[0].ToString());
+                        } else
+                        {
+                            result = auctionService.getBidListByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
+                        }
                         break;
                     // 根据域名查询域名竞拍详情
                     case "getbiddetailbydomain":
-                        if(req.@params[1] == null || req.@params[1].Equals(""))
+                        if (req.@params.Length < 2)
                         {   // 返回全部
                             result = auctionService.getBidDetailByDomain(req.@params[0].ToString());
                         } else

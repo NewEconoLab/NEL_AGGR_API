@@ -17,13 +17,69 @@ namespace NEL_Agency_API.Controllers
         public string Block_mongodbConnStr { get; set; }
         public string Block_mongodbDatabase { get; set; }
 
+        public JArray getBidListByAddressLikeDomain(string address, string prefixDomain)
+        {   
+            return getBidListByAddressLikeDomain(address, prefixDomain, 0, 0);
+        }
+        public JArray getBidListByAddressLikeDomain(string address, string prefixDomain, int pageNum, int pageSize)
+        {
+            JObject[] res = queryDomainList(address);
+            if (res == null || res.Length == 0)
+            {
+                return new JArray() { };
+            }
+
+            // 模糊匹配
+            res = res.Where(p => Convert.ToString(p["domain"]).StartsWith(prefixDomain)).ToArray();
+
+            // 分页处理
+            int sumCount = res.Count();
+            if (pageNum > 0 && pageSize > 0)
+            {
+                int st = (pageNum - 1) * pageSize;
+                int ed = pageSize;
+                res = res.Skip(st).Take(pageSize).ToArray();
+            }
+            JObject rr = new JObject();
+            rr.Add("list", new JArray() { res });
+            rr.Add("count", sumCount);
+            return new JArray() { rr };
+        }
+
         public JArray getBidListByAddress(string address)
+        {
+            return getBidListByAddress(address, 0, 0);
+        }
+        public JArray getBidListByAddress(string address, int pageNum, int pageSize)
+        {
+            JObject[] res = queryDomainList(address);
+            if(res == null || res.Length == 0)
+            {
+                return new JArray() { };
+            }
+
+            // 分页处理
+            int sumCount = res.Count();
+            if (pageNum > 0 && pageSize > 0)
+            {
+                int st = (pageNum - 1) * pageSize;
+                int ed = pageSize;
+                res = res.Skip(st).Take(pageSize).ToArray();
+            }
+            JObject rr = new JObject();
+            rr.Add("list", new JArray() { res });
+            rr.Add("count", sumCount);
+
+
+            return new JArray() { rr }; 
+        }
+        private JObject[] queryDomainList(string address)
         {
             MyJson.JsonNode_Object req = new MyJson.JsonNode_Object();
             req.Add("who", new MyJson.JsonNode_ValueString(address));
             req.Add("displayName", new MyJson.JsonNode_ValueString("addprice"));
             JArray arr = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", req.ToString());   // 第三个Coll
-            
+
             //
             JObject[] res = arr.Select(s => new
             {
@@ -37,7 +93,7 @@ namespace NEL_Agency_API.Controllers
                 queyBidDetailFilter.Add("parenthash", new MyJson.JsonNode_ValueString(item.parenthash));
                 queyBidDetailFilter.Add("displayName", new MyJson.JsonNode_ValueString("addprice"));
                 JArray queyBidDetailRes = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", queyBidDetailFilter.ToString());
-                
+
                 // 按出价人分组并计算出价总额，然后选出最高出价人
                 var maxPriceList = queyBidDetailRes.GroupBy(p => p["maxBuyer"], (k, g) => new
                 {
@@ -76,7 +132,7 @@ namespace NEL_Agency_API.Controllers
 
                 // 4.竞拍最高价
                 obj.Add("maxPrice", String.Format("{0:N8}", maxPriceList[0].maxPrice));
-                
+
                 // 5.竞拍最高价地址
                 string maxBuyer = Convert.ToString(token["maxBuyer"]);
                 obj.Add("maxBuyer", maxBuyer);
@@ -88,7 +144,7 @@ namespace NEL_Agency_API.Controllers
                 }
                 else
                 {
-                    obj.Add("auctionSpentTime", auctionSpentTime-THREE_DAY_SECONDS);
+                    obj.Add("auctionSpentTime", auctionSpentTime - THREE_DAY_SECONDS);
                 }
 
                 // 7.域名所有者(竞拍结束显示)根据子域名和父域名哈希查询(从第一个Coll中查询)
@@ -96,7 +152,7 @@ namespace NEL_Agency_API.Controllers
                 if (isEndAuction(blockHeightStrEd))
                 {
                     owner = getOwnerByDomainAndParentHash(item.domain, item.parenthash);
-                    auctionSpentTime = getBlockTimeByBlokcIndex(blockHeightStrEd)-startAuctionTime-THREE_DAY_SECONDS;
+                    auctionSpentTime = getBlockTimeByBlokcIndex(blockHeightStrEd) - startAuctionTime - THREE_DAY_SECONDS;
                     obj.Remove("auctionSpentTime");
                     obj.Add("auctionSpentTime", auctionSpentTime);
                 }
@@ -106,8 +162,7 @@ namespace NEL_Agency_API.Controllers
                 obj.Add("blockindex", blockindexStr);
                 return obj;
             }).OrderByDescending(q => q["blockindex"]).ToArray();
-            
-            return new JArray() { res }; 
+            return res;
         }
 
 
