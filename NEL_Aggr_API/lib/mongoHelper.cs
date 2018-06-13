@@ -29,8 +29,11 @@ namespace NEL_Agency_API.lib
         public string mongodbDatabase_NeonOnline = string.Empty;
 
        
-        public string queryDomainCollection = string.Empty;
-        public string queryTxidSetCollection = string.Empty;
+        public string queryDomainCollection_testnet = string.Empty;
+        public string queryTxidSetCollection_testnet = string.Empty;
+
+        public string queryDomainCollection_mainnet = string.Empty;
+        public string queryTxidSetCollection_mainnet = string.Empty;
 
         public string mongodbConnStrAtBlock_mainnet = string.Empty;
         public string mongodbDatabaseAtBlock_mainnet = string.Empty;
@@ -62,8 +65,12 @@ namespace NEL_Agency_API.lib
             mongodbConnStr_NeonOnline = config["mongodbConnStr_NeonOnline"];
             mongodbDatabase_NeonOnline = config["mongodbDatabase_NeonOnline"];
 
-            queryDomainCollection = config["queryDomainCollection_testnet"];
-            queryTxidSetCollection = config["queryTxidSetCollection_testnet"];
+
+            queryDomainCollection_testnet = config["queryDomainCollection_testnet"];
+            queryTxidSetCollection_testnet = config["queryTxidSetCollection_testnet"];
+            queryDomainCollection_mainnet = config["queryDomainCollection_mainnet"];
+            queryTxidSetCollection_mainnet = config["queryTxidSetCollection_mainnet"];
+
 
             mongodbConnStrAtBlock_mainnet = config["mongodbConnStrAtBlock_mainnet"];
             mongodbDatabaseAtBlock_mainnet = config["mongodbDatabaseAtBlock_mainnet"];

@@ -22,6 +22,9 @@ namespace NEL_Agency_API.Controllers
         private string mongodbConnStrAtBlock { get; set; }
         private string mongodbDatabaseAtBlock { get; set; }
 
+        private string queryDomainCollection { get; set; }
+        private string queryTxidSetCollection { get; set; }
+
         private OssFileService ossClient;
         private AuctionService auctionService;
 
@@ -49,6 +52,8 @@ namespace NEL_Agency_API.Controllers
                         Block_mongodbConnStr = mh.mongodbConnStrAtBlock_testnet,
                         Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_testnet
                     };
+                    queryDomainCollection = mh.queryDomainCollection_testnet;
+                    queryTxidSetCollection = mh.queryTxidSetCollection_testnet;
                     break;
                 case "mainnet":
                     mongodbConnStr = mh.mongodbConnStr_mainnet;
@@ -67,6 +72,8 @@ namespace NEL_Agency_API.Controllers
                         Block_mongodbConnStr = mh.mongodbConnStrAtBlock_mainnet,
                         Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_mainnet
                     };
+                    queryDomainCollection = mh.queryDomainCollection_mainnet;
+                    queryTxidSetCollection = mh.queryTxidSetCollection_mainnet;
                     break;
             }
         }
@@ -146,7 +153,8 @@ namespace NEL_Agency_API.Controllers
                         {
                             queryFilterRoot = req.@params[1].ToString();
                         }
-                        JArray queryDomainRes = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", queryDomainAddr);
+                        //JArray queryDomainRes = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", queryDomainAddr);
+                        JArray queryDomainRes = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, queryDomainCollection, queryDomainAddr);
 
                         // 域名列表
                         List<JObject> domainList = new List<JObject>();
@@ -168,7 +176,8 @@ namespace NEL_Agency_API.Controllers
                             if (parentHash != "")
                             {
                                 string queryNameHash = "{\"namehash\":\"" + parentHash + "\"}";
-                                JArray queryDomainResSub = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", queryNameHash);
+                                //JArray queryDomainResSub = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", queryNameHash);
+                                JArray queryDomainResSub = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, queryDomainCollection, queryNameHash);
                                 foreach (var dd in queryDomainResSub)
                                 {
                                     // 父域名只有一个
@@ -177,7 +186,7 @@ namespace NEL_Agency_API.Controllers
                                 }
                             }
                             fullDomain += parentDomain;
-                            if(!fullDomain.EndsWith(queryFilterRoot))
+                            if(!fullDomain.EndsWith(queryFilterRoot) && queryFilterRoot != "all"/*供测试使用*/)
                             {
                                 continue;
                             }
@@ -193,7 +202,8 @@ namespace NEL_Agency_API.Controllers
                             if (expire != 0 && expire < nowtime)
                             {
                                 string filter = "{$and: [{\"domain\":\"" + slfDomain + "\"}" + "," + "{\"parenthash\":\"" + parentHash + "\"}" + "," + "{\"owner\":\"" + "{$not:" + req.@params[0] + "}" + "\"}" + "]}";
-                                JArray queryDomainResFilter = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", filter);
+                                //JArray queryDomainResFilter = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", filter);
+                                JArray queryDomainResFilter = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, queryDomainCollection, filter);
                                 if (queryDomainResFilter != null && queryDomainResFilter.Count() > 0)
                                 {
                                     continue;
@@ -782,11 +792,13 @@ namespace NEL_Agency_API.Controllers
                         break;
                     case "getdomainbyaddress3":
                         findFliter = "{owner:\""+ req.@params[0].ToString() + "\"}";
-                        result = mh.GetData(notify_mongodbConnStr,notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", findFliter);
+                        //result = mh.GetData(notify_mongodbConnStr,notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", findFliter);
+                        result = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, queryDomainCollection, findFliter);
                         break;
                     case "getdomainbyaddress2":
                         findFliter = "{owner:\"" + req.@params[0].ToString() + "\"}";
-                        result = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", findFliter);
+                        //result = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", findFliter);
+                        result = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, queryDomainCollection, findFliter);
                         MyJson.JsonNode_Object json = new MyJson.JsonNode_Object();
                         foreach(var r in result)
                         {
