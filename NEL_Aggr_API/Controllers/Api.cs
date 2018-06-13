@@ -24,6 +24,7 @@ namespace NEL_Agency_API.Controllers
 
         private string queryDomainCollection { get; set; }
         private string queryTxidSetCollection { get; set; }
+        private string queryBidListCollection { get; set; }
 
         private OssFileService ossClient;
         private AuctionService auctionService;
@@ -50,7 +51,9 @@ namespace NEL_Agency_API.Controllers
                         Notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
                         mh = mh,
                         Block_mongodbConnStr = mh.mongodbConnStrAtBlock_testnet,
-                        Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_testnet
+                        Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_testnet,
+                        queryDomainCollection = mh.queryDomainCollection_testnet,
+                        queryBidListCollection = mh.queryBidListCollection_testnet
                     };
                     queryDomainCollection = mh.queryDomainCollection_testnet;
                     queryTxidSetCollection = mh.queryTxidSetCollection_testnet;
@@ -70,7 +73,9 @@ namespace NEL_Agency_API.Controllers
                         Notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
                         mh = mh,
                         Block_mongodbConnStr = mh.mongodbConnStrAtBlock_mainnet,
-                        Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_mainnet
+                        Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_mainnet,
+                        queryDomainCollection = mh.queryDomainCollection_mainnet,
+                        queryBidListCollection = mh.queryBidListCollection_mainnet
                     };
                     queryDomainCollection = mh.queryDomainCollection_mainnet;
                     queryTxidSetCollection = mh.queryTxidSetCollection_mainnet;

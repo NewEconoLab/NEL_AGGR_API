@@ -16,6 +16,11 @@ namespace NEL_Agency_API.Controllers
         public mongoHelper mh { set; get; }
         public string Block_mongodbConnStr { get; set; }
         public string Block_mongodbDatabase { get; set; }
+        public string queryDomainCollection { get; set; }
+        public string queryBidListCollection { get; set; }
+
+
+
 
         public JArray getBidListByAddressLikeDomain(string address, string prefixDomain)
         {   
@@ -78,7 +83,8 @@ namespace NEL_Agency_API.Controllers
             MyJson.JsonNode_Object req = new MyJson.JsonNode_Object();
             req.Add("who", new MyJson.JsonNode_ValueString(address));
             req.Add("displayName", new MyJson.JsonNode_ValueString("addprice"));
-            JArray arr = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", req.ToString());   // 第三个Coll
+            //JArray arr = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", req.ToString());   // 第三个Coll
+            JArray arr = queryNofity(queryBidListCollection, req.ToString());   // 第三个Coll
 
             //
             JObject[] res = arr.Select(s => new
@@ -92,7 +98,8 @@ namespace NEL_Agency_API.Controllers
                 queyBidDetailFilter.Add("domain", new MyJson.JsonNode_ValueString(item.domain));
                 queyBidDetailFilter.Add("parenthash", new MyJson.JsonNode_ValueString(item.parenthash));
                 queyBidDetailFilter.Add("displayName", new MyJson.JsonNode_ValueString("addprice"));
-                JArray queyBidDetailRes = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", queyBidDetailFilter.ToString());
+                //JArray queyBidDetailRes = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", queyBidDetailFilter.ToString());
+                JArray queyBidDetailRes = queryNofity(queryBidListCollection, queyBidDetailFilter.ToString());
 
                 // 按出价人分组并计算出价总额，然后选出最高出价人
                 var maxPriceList = queyBidDetailRes.GroupBy(p => p["maxBuyer"], (k, g) => new
@@ -177,7 +184,8 @@ namespace NEL_Agency_API.Controllers
             MyJson.JsonNode_Object queyBidDetailFilter = new MyJson.JsonNode_Object();
             queyBidDetailFilter.Add("domain", new MyJson.JsonNode_ValueString(domainArr[0]));
             queyBidDetailFilter.Add("parenthash", new MyJson.JsonNode_ValueString(getNameHash(domainArr[1])));
-            JArray queyBidDetailRes = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", queyBidDetailFilter.ToString());
+            //JArray queyBidDetailRes = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", queyBidDetailFilter.ToString());
+            JArray queyBidDetailRes = queryNofity(queryBidListCollection, queyBidDetailFilter.ToString());
             
             // 获取与该域名相关数据
             JObject[] arr = queyBidDetailRes.Select(item => {
@@ -235,7 +243,8 @@ namespace NEL_Agency_API.Controllers
             MyJson.JsonNode_Object queyBidDetailFilter = new MyJson.JsonNode_Object();
             queyBidDetailFilter.Add("domain", new MyJson.JsonNode_ValueString(domainArr[0]));
             queyBidDetailFilter.Add("parenthash", new MyJson.JsonNode_ValueString(getNameHash(domainArr[1])));
-            JArray queyBidDetailRes = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", queyBidDetailFilter.ToString());
+            //JArray queyBidDetailRes = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", queyBidDetailFilter.ToString());
+            JArray queyBidDetailRes = queryNofity(queryBidListCollection, queyBidDetailFilter.ToString());
 
             JObject res = queyBidDetailRes.Select(item =>
             {
@@ -276,7 +285,8 @@ namespace NEL_Agency_API.Controllers
             if (parentHash != "")
             {
                 string queryNameHash = "{\"namehash\":\"" + parentHash + "\"}";
-                JArray queryDomainResSub = queryNofity("0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", queryNameHash);
+                //JArray queryDomainResSub = queryNofity("0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", queryNameHash);
+                JArray queryDomainResSub = queryNofity(queryDomainCollection, queryNameHash);
                 foreach (var dd in queryDomainResSub)
                 {
                     // 父域名只有一个
@@ -301,7 +311,8 @@ namespace NEL_Agency_API.Controllers
             MyJson.JsonNode_Object queyOwnerFilter = new MyJson.JsonNode_Object();
             queyOwnerFilter.Add("domain", new MyJson.JsonNode_ValueString(domain));
             queyOwnerFilter.Add("parenthash", new MyJson.JsonNode_ValueString(parenthash));
-            JArray queryOwnerRes = queryNofity("0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", queyOwnerFilter.ToString());
+            //JArray queryOwnerRes = queryNofity("0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", queyOwnerFilter.ToString());
+            JArray queryOwnerRes = queryNofity(queryDomainCollection, queyOwnerFilter.ToString());
             owner = queryOwnerRes[0]["owner"].ToString();
             return owner;
         }

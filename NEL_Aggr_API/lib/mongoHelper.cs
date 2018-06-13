@@ -30,10 +30,12 @@ namespace NEL_Agency_API.lib
 
        
         public string queryDomainCollection_testnet = string.Empty;
-        public string queryTxidSetCollection_testnet = string.Empty;
+        public string queryTxidSetCollection_testnet = string.Empty; 
+        public string queryBidListCollection_testnet = string.Empty; 
 
         public string queryDomainCollection_mainnet = string.Empty;
         public string queryTxidSetCollection_mainnet = string.Empty;
+        public string queryBidListCollection_mainnet = string.Empty;
 
         public string mongodbConnStrAtBlock_mainnet = string.Empty;
         public string mongodbDatabaseAtBlock_mainnet = string.Empty;
@@ -68,8 +70,10 @@ namespace NEL_Agency_API.lib
 
             queryDomainCollection_testnet = config["queryDomainCollection_testnet"];
             queryTxidSetCollection_testnet = config["queryTxidSetCollection_testnet"];
+            queryBidListCollection_testnet = config["queryBidListCollection_testnet"];
             queryDomainCollection_mainnet = config["queryDomainCollection_mainnet"];
             queryTxidSetCollection_mainnet = config["queryTxidSetCollection_mainnet"];
+            queryBidListCollection_mainnet = config["queryBidListCollection_mainnet"];
 
 
             mongodbConnStrAtBlock_mainnet = config["mongodbConnStrAtBlock_mainnet"];
