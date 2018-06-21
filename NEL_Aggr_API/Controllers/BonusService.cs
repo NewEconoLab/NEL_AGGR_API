@@ -36,7 +36,7 @@ namespace NEL_Agency_API.Controllers
             } else
             {
                 string sortStr = "{\"blockindex\":-1,\"txid\":-1}";
-                result = mh.GetDataPages(Notify_mongodbConnStr, Notify_mongodbDatabase, BonusNofityCol, sortStr, pageNum, pageSize, findFliter);
+                result = mh.GetDataPages(Notify_mongodbConnStr, Notify_mongodbDatabase, BonusNofityCol, sortStr, pageSize, pageNum, findFliter);
             }
             List<JObject> res = null;
             if ( result != null)
