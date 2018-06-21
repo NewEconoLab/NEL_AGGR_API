@@ -28,6 +28,7 @@ namespace NEL_Agency_API.Controllers
 
         private OssFileService ossClient;
         private AuctionService auctionService;
+        private BonusService bonusService;
 
         httpHelper hh = new httpHelper();
         mongoHelper mh = new mongoHelper();
@@ -57,6 +58,16 @@ namespace NEL_Agency_API.Controllers
                     };
                     queryDomainCollection = mh.queryDomainCollection_testnet;
                     queryTxidSetCollection = mh.queryTxidSetCollection_testnet;
+                    bonusService = new BonusService
+                    {
+                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
+                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
+                        mh = mh,
+                        BonusNofityCol = mh.bonusNotifyCol_testnet,
+                        BonusNofityFrom = mh.bonusNotifyFrom_testnet,
+                        Block_mongodbConnStr = mh.mongodbConnStrAtBlock_testnet,
+                        Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_testnet
+                    };
                     break;
                 case "mainnet":
                     mongodbConnStr = mh.mongodbConnStr_mainnet;
@@ -79,6 +90,16 @@ namespace NEL_Agency_API.Controllers
                     };
                     queryDomainCollection = mh.queryDomainCollection_mainnet;
                     queryTxidSetCollection = mh.queryTxidSetCollection_mainnet;
+                    bonusService = new BonusService
+                    {
+                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
+                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
+                        mh = mh,
+                        BonusNofityCol = mh.bonusNotifyCol_mainnet,
+                        BonusNofityFrom = mh.bonusNotifyFrom_mainnet,
+                        Block_mongodbConnStr = mh.mongodbConnStrAtBlock_mainnet,
+                        Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_mainnet
+                    };
                     break;
             }
         }
@@ -115,6 +136,16 @@ namespace NEL_Agency_API.Controllers
             {
                 switch (req.method)
                 {
+                    // 根据地址查询分红历史
+                    case "getbonushistbyaddress":
+                        if(req.@params.Length < 3)
+                        {
+                            result = bonusService.getBonusHistByAddress(req.@params[0].ToString());
+                        } else
+                        {
+                            result = bonusService.getBonusHistByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
+                        }
+                        break;
                     // 根据地址查询竞拍域名列表(域名支持模糊匹配)
                     case "searchdomainbyaddress":
                         if (req.@params.Length < 3)

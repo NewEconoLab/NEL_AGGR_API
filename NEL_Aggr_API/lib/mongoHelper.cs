@@ -44,6 +44,11 @@ namespace NEL_Agency_API.lib
 
         public string ossServiceUrl_testnet = string.Empty;
         public string ossServiceUrl_mainnet = string.Empty;
+        
+        public string bonusNotifyCol_testnet = string.Empty;
+        public string bonusNotifyFrom_testnet = string.Empty;
+        public string bonusNotifyCol_mainnet = string.Empty;
+        public string bonusNotifyFrom_mainnet = string.Empty;
 
 
         public mongoHelper() {
@@ -83,6 +88,11 @@ namespace NEL_Agency_API.lib
 
             ossServiceUrl_testnet = config["ossServiceUrl_testnet"];
             ossServiceUrl_mainnet = config["ossServiceUrl_mainnet"];
+
+            bonusNotifyCol_testnet = config["bonusNotifyCol_testnet"];
+            bonusNotifyFrom_testnet = config["bonusNotifyFrom_testnet"];
+            bonusNotifyCol_mainnet = config["bonusNotifyCol_mainnet"];
+            bonusNotifyFrom_mainnet = config["bonusNotifyFrom_mainnet"];
 
         }
 
