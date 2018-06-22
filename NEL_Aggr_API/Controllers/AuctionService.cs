@@ -85,7 +85,7 @@ namespace NEL_Agency_API.Controllers
             req.Add("displayName", new MyJson.JsonNode_ValueString("addprice"));
             //JArray arr = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", req.ToString());   // 第三个Coll
             JArray arr = queryNofity(queryBidListCollection, req.ToString());   // 第三个Coll
-
+            
             //
             JObject[] res = arr.Select(s => new
             {
@@ -109,7 +109,8 @@ namespace NEL_Agency_API.Controllers
                     token = g.OrderByDescending(c => c["blockindex"]).ToList()[0]
                 }).OrderByDescending(k => k.maxPrice).ToList();
                 JToken token = maxPriceList[0].token;
-                double mybidprice = maxPriceList.Where(p => p.maxBuyer.ToString().Equals(address)).First().maxPrice;
+                bool hasOnlyBidOpen = maxPriceList.Count == 1 && Convert.ToString(token["maxBuyer"]) == "";
+                double mybidprice = hasOnlyBidOpen ? 0:maxPriceList.Where(p => p.maxBuyer.ToString().Equals(address)).First().maxPrice;
 
                 JObject obj = new JObject();
                 obj.Add("mybidprice", String.Format("{0:N8}", mybidprice));
@@ -141,7 +142,7 @@ namespace NEL_Agency_API.Controllers
                 obj.Add("maxPrice", String.Format("{0:N8}", maxPriceList[0].maxPrice));
 
                 // 5.竞拍最高价地址
-                string maxBuyer = Convert.ToString(token["maxBuyer"]);
+                string maxBuyer = hasOnlyBidOpen ? "":Convert.ToString(token["maxBuyer"]);
                 obj.Add("maxBuyer", maxBuyer);
 
                 // 6.竞拍已耗时(竞拍中显示)
