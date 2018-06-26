@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using ThinNeo;
 
@@ -11,6 +12,7 @@ namespace NEL_Agency_API.Controllers
     public class AuctionService
     {
         private long THREE_DAY_SECONDS = 3 * 24 * 60 * 60;
+        private long FIVE_DAY_SECONDS = 5 * 24 * 60 * 60;
         public string Notify_mongodbConnStr { set; get; }
         public string Notify_mongodbDatabase { set; get; }
         public mongoHelper mh { set; get; }
@@ -18,8 +20,16 @@ namespace NEL_Agency_API.Controllers
         public string Block_mongodbDatabase { get; set; }
         public string queryDomainCollection { get; set; }
         public string queryBidListCollection { get; set; }
+        public AuctionRecharge auctionRecharge { get; set; }
 
-
+        public JArray rechargeAndTransfer(string txhex1, string txhex2)
+        {
+            return auctionRecharge.rechargeAndTransfer(txhex1, txhex2);
+        }
+        public JArray getRechargeAndTransfer(string txid)
+        {
+            return auctionRecharge.getRechargeAndTransfer(txid);
+        }
 
 
         public JArray getBidListByAddressLikeDomain(string address, string prefixDomain)
@@ -169,7 +179,7 @@ namespace NEL_Agency_API.Controllers
                 string blockindexStr = Convert.ToString(token["blockindex"]);
                 obj.Add("blockindex", blockindexStr);
                 return obj;
-            }).OrderByDescending(q => q["blockindex"]).ToArray();
+            }).Where(p => Convert.ToString(p["auctionState"]) != canTryAgainBidFlag).OrderByDescending(q => q["blockindex"]).ToArray();
             return res;
         }
 
@@ -329,13 +339,19 @@ namespace NEL_Agency_API.Controllers
             {
                 // 竞拍中
                 auctionState = "Fixed period";
-            }
+            } 
             else
             {
                 if (!isEndAuction(blockHeightStrEd))
                 {
                     // 随机
                     auctionState = "Random period";
+
+                    if (auctionSpentTime > FIVE_DAY_SECONDS)
+                    {
+                        // 流拍
+                        auctionState = canTryAgainBidFlag;
+                    }
                 }
                 else
                 {
@@ -345,6 +361,7 @@ namespace NEL_Agency_API.Controllers
             }
             return auctionState;
         }
+        private string canTryAgainBidFlag = "CanTryAgainBid";
         private string getNameHash(string domain)
         {
             return "0x" + Helper.Bytes2HexString(new NNSUrl(domain).namehash.Reverse().ToArray());

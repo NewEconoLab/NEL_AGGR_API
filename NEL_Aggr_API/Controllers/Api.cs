@@ -25,6 +25,7 @@ namespace NEL_Agency_API.Controllers
         private string queryDomainCollection { get; set; }
         private string queryTxidSetCollection { get; set; }
         private string queryBidListCollection { get; set; }
+        
 
         private OssFileService ossClient;
         private AuctionService auctionService;
@@ -46,6 +47,14 @@ namespace NEL_Agency_API.Controllers
                     mongodbConnStrAtBlock = mh.mongodbConnStrAtBlock_testnet;
                     mongodbDatabaseAtBlock = mh.mongodbDatabaseAtBlock_testnet;
                     ossClient = new OssFileService(mh.ossServiceUrl_testnet);
+                    AuctionRecharge auctionRechargetTestNet = new AuctionRecharge()
+                    {
+                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
+                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
+                        mh = mh,
+                        nelJsonRPCUrl = mh.nelJsonRPCUrl_testnet,
+                        rechargeCollection = mh.rechargeCollection_testnet
+                    };
                     auctionService = new AuctionService()
                     {
                         Notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
@@ -54,7 +63,8 @@ namespace NEL_Agency_API.Controllers
                         Block_mongodbConnStr = mh.mongodbConnStrAtBlock_testnet,
                         Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_testnet,
                         queryDomainCollection = mh.queryDomainCollection_testnet,
-                        queryBidListCollection = mh.queryBidListCollection_testnet
+                        queryBidListCollection = mh.queryBidListCollection_testnet,
+                        auctionRecharge = auctionRechargetTestNet
                     };
                     queryDomainCollection = mh.queryDomainCollection_testnet;
                     queryTxidSetCollection = mh.queryTxidSetCollection_testnet;
@@ -78,6 +88,14 @@ namespace NEL_Agency_API.Controllers
                     mongodbConnStrAtBlock = mh.mongodbConnStrAtBlock_mainnet;
                     mongodbDatabaseAtBlock = mh.mongodbDatabaseAtBlock_mainnet;
                     ossClient = new OssFileService(mh.ossServiceUrl_mainnet);
+                    AuctionRecharge auctionRechargetMainNet = new AuctionRecharge()
+                    {
+                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
+                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
+                        mh = mh,
+                        nelJsonRPCUrl = mh.nelJsonRPCUrl_mainnet,
+                        rechargeCollection = mh.rechargeCollection_mainnet
+                    };
                     auctionService = new AuctionService()
                     {
                         Notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
@@ -86,7 +104,8 @@ namespace NEL_Agency_API.Controllers
                         Block_mongodbConnStr = mh.mongodbConnStrAtBlock_mainnet,
                         Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_mainnet,
                         queryDomainCollection = mh.queryDomainCollection_mainnet,
-                        queryBidListCollection = mh.queryBidListCollection_mainnet
+                        queryBidListCollection = mh.queryBidListCollection_mainnet,
+                        auctionRecharge = auctionRechargetMainNet
                     };
                     queryDomainCollection = mh.queryDomainCollection_mainnet;
                     queryTxidSetCollection = mh.queryTxidSetCollection_mainnet;
@@ -136,6 +155,14 @@ namespace NEL_Agency_API.Controllers
             {
                 switch (req.method)
                 {
+                    // 充值&转账
+                    case "rechargeandtransfer":
+                        result = auctionService.rechargeAndTransfer(req.@params[0].ToString(), req.@params[1].ToString());
+                        break;
+                    // 查询充值&转账交易
+                    case "getrechargeandtransfer":
+                        result = auctionService.getRechargeAndTransfer(req.@params[0].ToString());
+                        break;
                     // 根据地址查询分红历史
                     case "getbonushistbyaddress":
                         if(req.@params.Length < 3)

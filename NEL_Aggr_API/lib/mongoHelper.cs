@@ -50,6 +50,9 @@ namespace NEL_Agency_API.lib
         public string bonusNotifyCol_mainnet = string.Empty;
         public string bonusNotifyFrom_mainnet = string.Empty;
 
+        public string rechargeCollection_mainnet = string.Empty;
+        public string rechargeCollection_testnet = string.Empty;
+
 
         public mongoHelper() {
             var config = new ConfigurationBuilder()
@@ -94,6 +97,8 @@ namespace NEL_Agency_API.lib
             bonusNotifyCol_mainnet = config["bonusNotifyCol_mainnet"];
             bonusNotifyFrom_mainnet = config["bonusNotifyFrom_mainnet"];
 
+            rechargeCollection_mainnet = config["rechargeCollection_mainnet"];
+            rechargeCollection_testnet = config["rechargeCollection_testnet"];
         }
 
         public JArray GetData(string mongodbConnStr,string mongodbDatabase, string coll,string findFliter)
