@@ -11,8 +11,8 @@ namespace NEL_Agency_API.Controllers
 {
     public class AuctionService
     {
-        private long THREE_DAY_SECONDS = 3 * 24 * 60 * 60;
-        private long FIVE_DAY_SECONDS = 5 * 24 * 60 * 60;
+        private long THREE_DAY_SECONDS = 3 * /*24 * */60 * 60 /*测试时5分钟一天*/* 5;
+        private long FIVE_DAY_SECONDS = 5 * /*24 * */60 * 60 /*测试时5分钟一天*/ * 5;
         public string Notify_mongodbConnStr { set; get; }
         public string Notify_mongodbDatabase { set; get; }
         public mongoHelper mh { set; get; }
@@ -145,7 +145,7 @@ namespace NEL_Agency_API.Controllers
                 string auctionState;
                 long auctionSpentTime = getAuctionSpentTime(startAuctionTime);
                 string blockHeightStrEd = Convert.ToString(token["endBlock"]);
-                auctionState = getAuctionState(auctionSpentTime, blockHeightStrEd);
+                auctionState = getAuctionState(auctionSpentTime, blockHeightStrEd, hasOnlyBidOpen);
                 obj.Add("auctionState", auctionState);
 
                 // 4.竞拍最高价
@@ -328,11 +328,11 @@ namespace NEL_Agency_API.Controllers
             return owner;
         }
 
-        private string getAuctionState(string blockHeightStrSt, string blockHeightStrEd)
+        private string getAuctionState(string blockHeightStrSt, string blockHeightStrEd, bool hasOnlyBidOpen = false)
         {
-            return getAuctionState(getAuctionSpentTime(getStartAuctionTime(blockHeightStrSt)), blockHeightStrEd);
+            return getAuctionState(getAuctionSpentTime(getStartAuctionTime(blockHeightStrSt)), blockHeightStrEd, hasOnlyBidOpen);
         }
-        private string getAuctionState(long auctionSpentTime, string blockHeightStrEd) 
+        private string getAuctionState(long auctionSpentTime, string blockHeightStrEd, bool hasOnlyBidOpen) 
         {
             string auctionState = "";
             if (auctionSpentTime < THREE_DAY_SECONDS)
@@ -347,7 +347,7 @@ namespace NEL_Agency_API.Controllers
                     // 随机
                     auctionState = "Random period";
 
-                    if (auctionSpentTime > FIVE_DAY_SECONDS)
+                    if (hasOnlyBidOpen &&auctionSpentTime > FIVE_DAY_SECONDS)
                     {
                         // 流拍
                         auctionState = canTryAgainBidFlag;
