@@ -113,7 +113,9 @@ namespace NEL_Agency_API.Controllers
 
                 // ChangeLog-st-20180628
                 // 1. 获取最大出价者
-                JToken maxPriceObj = queyBidDetailRes.OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).OrderBy(minBlockindexItem => Convert.ToString(minBlockindexItem["getTime"])).ToArray()[0];
+                JToken maxPriceObj = queyBidDetailRes.OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"]))/*.OrderBy(minBlockindexItem => Convert.ToString(minBlockindexItem["getTime"]))*/.ToArray()[0];
+
+
                 // 2. 获取自己最高出价
                 JToken maxPriceSlf = queyBidDetailRes.Where(
                     slfItem => Convert.ToString(slfItem["maxBuyer"]) == address
@@ -137,15 +139,15 @@ namespace NEL_Agency_API.Controllers
                 // EndSelling           结束-------endBlock
                 string auctionState;
                 long auctionSpentTime = getAuctionSpentTime(startAuctionTime);
-                string blockHeightStrEd = Convert.ToString(maxPriceSlf["endBlock"]);
-                bool hasOnlyBidOpen = Convert.ToString(maxPriceSlf["maxBuyer"]) == "";
+                string blockHeightStrEd = Convert.ToString(maxPriceObj["endBlock"]);
+                bool hasOnlyBidOpen = Convert.ToString(maxPriceObj["maxBuyer"]) == "";
                 auctionState = getAuctionState(auctionSpentTime, blockHeightStrEd, hasOnlyBidOpen);
                 domainLastStateObj.Add("auctionState", auctionState);
                 // 4.竞拍最高价
-                domainLastStateObj.Add("maxPrice", Convert.ToString(maxPriceSlf["maxPrice"]));
+                domainLastStateObj.Add("maxPrice", Convert.ToString(maxPriceObj["maxPrice"]));
 
                 // 5.竞拍最高价地址
-                domainLastStateObj.Add("maxBuyer", Convert.ToString(maxPriceSlf["maxBuyer"]));
+                domainLastStateObj.Add("maxBuyer", Convert.ToString(maxPriceObj["maxBuyer"]));
                 // 6.竞拍已耗时(竞拍中显示)
                 if (auctionSpentTime < THREE_DAY_SECONDS)
                 {
@@ -166,7 +168,7 @@ namespace NEL_Agency_API.Controllers
                 }
                 domainLastStateObj.Add("owner", owner);
 
-                string blockindexStr = Convert.ToString(maxPriceSlf["blockindex"]);
+                string blockindexStr = Convert.ToString(maxPriceObj["blockindex"]);
                 domainLastStateObj.Add("blockindex", blockindexStr);
                 return domainLastStateObj;
                 // ChangeLog-ed-20180628
