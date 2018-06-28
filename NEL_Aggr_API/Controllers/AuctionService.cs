@@ -111,6 +111,69 @@ namespace NEL_Agency_API.Controllers
                 //JArray queyBidDetailRes = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", queyBidDetailFilter.ToString());
                 JArray queyBidDetailRes = queryNofity(queryBidListCollection, queyBidDetailFilter.ToString());
 
+                // ChangeLog-st-20180628
+                // 1. 获取最大出价者
+                JToken maxPriceObj = queyBidDetailRes.OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).OrderBy(minBlockindexItem => Convert.ToString(minBlockindexItem["getTime"])).ToArray()[0];
+                // 2. 获取自己最高出价
+                JToken maxPriceSlf = queyBidDetailRes.Where(
+                    slfItem => Convert.ToString(slfItem["maxBuyer"]) == address
+                    || Convert.ToString(slfItem["maxBuyer"]) == null
+                    || Convert.ToString(slfItem["maxBuyer"]) == ""
+                    ).OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).ToArray()[0];
+                JObject domainLastStateObj = new JObject();
+                // 1. 域名
+                string fullDomain = item.domain + getParentDomainByParentHash(item.parenthash); // 父域名 + 子域名
+                domainLastStateObj.Add("domain", fullDomain);
+                // 2. 开标时间
+                long startAuctionTime;
+                String blockHeightStrSt = Convert.ToString(maxPriceSlf["startBlockSelling"]);
+                startAuctionTime = getStartAuctionTime(blockHeightStrSt);
+                domainLastStateObj.Add("startAuctionTime", startAuctionTime);
+                // 3.状态(取值：竞拍中、随机中、结束三种，需根据开标时间计算，其中竞拍中为0~3天)
+                // NotSelling           
+                // SellingStepFix01     0~2天
+                // SellingStepFix02     第三天
+                // SellingStepRan       随机
+                // EndSelling           结束-------endBlock
+                string auctionState;
+                long auctionSpentTime = getAuctionSpentTime(startAuctionTime);
+                string blockHeightStrEd = Convert.ToString(maxPriceSlf["endBlock"]);
+                bool hasOnlyBidOpen = Convert.ToString(maxPriceSlf["maxBuyer"]) == "";
+                auctionState = getAuctionState(auctionSpentTime, blockHeightStrEd, hasOnlyBidOpen);
+                domainLastStateObj.Add("auctionState", auctionState);
+                // 4.竞拍最高价
+                domainLastStateObj.Add("maxPrice", Convert.ToString(maxPriceSlf["maxPrice"]));
+
+                // 5.竞拍最高价地址
+                domainLastStateObj.Add("maxBuyer", Convert.ToString(maxPriceSlf["maxBuyer"]));
+                // 6.竞拍已耗时(竞拍中显示)
+                if (auctionSpentTime < THREE_DAY_SECONDS)
+                {
+                    domainLastStateObj.Add("auctionSpentTime", auctionSpentTime);
+                }
+                else
+                {
+                    domainLastStateObj.Add("auctionSpentTime", auctionSpentTime - THREE_DAY_SECONDS);
+                }
+                // 7.域名所有者(竞拍结束显示)根据子域名和父域名哈希查询(从第一个Coll中查询)
+                string owner = "";//
+                if (isEndAuction(blockHeightStrEd))
+                {
+                    owner = getOwnerByDomainAndParentHash(item.domain, item.parenthash);
+                    auctionSpentTime = getBlockTimeByBlokcIndex(blockHeightStrEd) - startAuctionTime - THREE_DAY_SECONDS;
+                    domainLastStateObj.Remove("auctionSpentTime");
+                    domainLastStateObj.Add("auctionSpentTime", auctionSpentTime);
+                }
+                domainLastStateObj.Add("owner", owner);
+
+                string blockindexStr = Convert.ToString(maxPriceSlf["blockindex"]);
+                domainLastStateObj.Add("blockindex", blockindexStr);
+                return domainLastStateObj;
+                // ChangeLog-ed-20180628
+                // ChangeLog-ed
+
+
+                /*
                 // 按出价人分组并计算出价总额，然后选出最高出价人
                 var maxPriceList = queyBidDetailRes.GroupBy(p => p["maxBuyer"], (k, g) => new
                 {
@@ -179,6 +242,7 @@ namespace NEL_Agency_API.Controllers
                 string blockindexStr = Convert.ToString(token["blockindex"]);
                 obj.Add("blockindex", blockindexStr);
                 return obj;
+                */
             }).Where(p => Convert.ToString(p["auctionState"]) != canTryAgainBidFlag).OrderByDescending(q => q["blockindex"]).ToArray();
             return res;
         }
