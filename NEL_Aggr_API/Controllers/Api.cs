@@ -30,6 +30,7 @@ namespace NEL_Agency_API.Controllers
         private OssFileService ossClient;
         private AuctionService auctionService;
         private BonusService bonusService;
+        private AssetService assetService;
 
         httpHelper hh = new httpHelper();
         mongoHelper mh = new mongoHelper();
@@ -78,6 +79,12 @@ namespace NEL_Agency_API.Controllers
                         Block_mongodbConnStr = mh.mongodbConnStrAtBlock_testnet,
                         Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_testnet
                     };
+                    assetService = new AssetService
+                    {
+                        mongodbConnStr = mh.mongodbConnStrAtBlock_testnet,
+                        mongodbDatabase = mh.mongodbDatabaseAtBlock_testnet,
+                        mh = mh
+                    };
                     break;
                 case "mainnet":
                     mongodbConnStr = mh.mongodbConnStr_mainnet;
@@ -119,6 +126,12 @@ namespace NEL_Agency_API.Controllers
                         Block_mongodbConnStr = mh.mongodbConnStrAtBlock_mainnet,
                         Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_mainnet
                     };
+                    assetService = new AssetService
+                    {
+                        mongodbConnStr = mh.mongodbConnStrAtBlock_mainnet,
+                        mongodbDatabase = mh.mongodbDatabaseAtBlock_mainnet,
+                        mh = mh
+                    };
                     break;
             }
         }
@@ -155,6 +168,10 @@ namespace NEL_Agency_API.Controllers
             {
                 switch (req.method)
                 {
+                    // 资产名称模糊查询
+                    case "fuzzysearchasset":
+                        result = assetService.fuzzySearchAsset(req.@params[0].ToString());
+                        break;
                     // 充值&转账
                     case "rechargeandtransfer":
                         result = auctionService.rechargeAndTransfer(req.@params[0].ToString(), req.@params[1].ToString());
