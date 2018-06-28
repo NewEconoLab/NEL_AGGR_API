@@ -11,8 +11,8 @@ namespace NEL_Agency_API.Controllers
 {
     public class AuctionService
     {
-        private long THREE_DAY_SECONDS = 3 * /*24 * */60 * 60 /*测试时5分钟一天*/* 5;
-        private long FIVE_DAY_SECONDS = 5 * /*24 * */60 * 60 /*测试时5分钟一天*/ * 5;
+        private long THREE_DAY_SECONDS = 3 * /*24 * 60 * */60 /*测试时5分钟一天*/* 5;
+        private long FIVE_DAY_SECONDS = 5 * /*24 * 60 * */60 /*测试时5分钟一天*/ * 5;
         public string Notify_mongodbConnStr { set; get; }
         public string Notify_mongodbDatabase { set; get; }
         public mongoHelper mh { set; get; }
