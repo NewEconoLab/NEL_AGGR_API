@@ -360,10 +360,12 @@ namespace NEL_Agency_API.Controllers
             string auctionState = getAuctionState(res["startBlockSelling"].ToString(), res["endBlock"].ToString());
             res.Add("auctionState", auctionState);
 
+            /*
             // 更新出价总额
             double maxPrice = queyBidDetailRes.Where(p => p["maxBuyer"].Equals(res["maxBuyer"])).Sum(p => double.Parse(Convert.ToString(p["maxPrice"])));
             res.Remove("maxPrice");
             res.Add("maxPrice", String.Format("{0:N8}", maxPrice));
+            */
             res.Remove("startBlockSelling");
             res.Remove("endBlock");
 
