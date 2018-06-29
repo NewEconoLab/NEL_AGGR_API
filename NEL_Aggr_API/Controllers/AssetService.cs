@@ -17,14 +17,14 @@ namespace NEL_Agency_API.Controllers
         public JArray fuzzySearchAsset(string name, int pageNum = 1, int pageSize = 6)
         {
             // 转义
-            JArray res1 = search("asset", name, pageNum, pageSize);
+            JArray res1 = search(false, "asset", name, pageNum, pageSize);
             // 非转义
-            JArray res2 = search("asset", transferName(name), pageNum, pageSize);
+            JArray res2 = search(false, "asset", transferName(name), pageNum, pageSize);
 
             // 转义
-            JArray res3 = search("NEP5asset", name, pageNum, pageSize);
+            JArray res3 = search(true, "NEP5asset", name, pageNum, pageSize);
             // 非转义
-            JArray res4 = search("NEP5asset", transferName(name), pageNum, pageSize);
+            JArray res4 = search(true, "NEP5asset", transferName(name), pageNum, pageSize);
 
             List<JToken> list = new List<JToken>();
             foreach (var item in res1)
@@ -98,19 +98,39 @@ namespace NEL_Agency_API.Controllers
          
         }
         
-        private JArray search(string coll, string name, int pageNum =1, int pageSize = 6)
+        private JArray search(bool isNep5, string coll, string name, int pageNum =1, int pageSize = 6)
         {
             JObject nameFilter = new JObject();
             JObject subNameFilter = new JObject();
             subNameFilter.Add("$regex", name);
             subNameFilter.Add("$options", "i");
-            nameFilter.Add("name.name", subNameFilter);
+            
+            if(isNep5)
+            {
+                nameFilter.Add("name", subNameFilter);
+            } else
+            {
+                nameFilter.Add("name.name", subNameFilter);
+            }
+
             JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, coll, "{}", pageSize, pageNum, nameFilter.ToString());
             if (res == null || res.Count == 0)
             {
                 return new JArray() { };
             }
 
+            if(isNep5)
+            {
+                return new JArray() {{
+                res.Select(item => {
+                    string id = Convert.ToString(item["assetid"]);
+                    JObject obj = new JObject();
+                    obj.Add("assetid", id);
+                    obj.Add("name", transferRes(id, Convert.ToString(item["name"])));
+                    return obj;
+                }).ToArray()
+            } };
+            }
             return new JArray() {{
                 res.SelectMany(item => {
                     string id = Convert.ToString(item["id"]);
