@@ -113,7 +113,7 @@ namespace NEL_Agency_API.Controllers
 
                 // ChangeLog-st-20180628
                 // 1. 获取最大出价者
-                JToken maxPriceObj = queyBidDetailRes.OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"]))/*.OrderBy(minBlockindexItem => Convert.ToString(minBlockindexItem["getTime"]))*/.ToArray()[0];
+                JToken maxPriceObj = queyBidDetailRes.OrderByDescending(maxPriceItem => int.Parse(Convert.ToString(maxPriceItem["maxPrice"])))/*.OrderBy(minBlockindexItem => Convert.ToString(minBlockindexItem["getTime"]))*/.ToArray()[0];
 
 
                 // 2. 获取自己最高出价
