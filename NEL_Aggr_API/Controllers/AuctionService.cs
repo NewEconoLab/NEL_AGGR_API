@@ -261,11 +261,13 @@ namespace NEL_Agency_API.Controllers
             MyJson.JsonNode_Object queyBidDetailFilter = new MyJson.JsonNode_Object();
             queyBidDetailFilter.Add("domain", new MyJson.JsonNode_ValueString(domainArr[0]));
             queyBidDetailFilter.Add("parenthash", new MyJson.JsonNode_ValueString(getNameHash(domainArr[1])));
+            queyBidDetailFilter.Add("displayName", new MyJson.JsonNode_ValueString("addprice"));
             //JArray queyBidDetailRes = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", queyBidDetailFilter.ToString());
             JArray queyBidDetailRes = queryNofity(queryBidListCollection, queyBidDetailFilter.ToString());
-            
+
             // 获取与该域名相关数据
-            JObject[] arr = queyBidDetailRes.Select(item => {
+            JObject[] arr = queyBidDetailRes.Select(item =>
+            {
                 JObject obj = new JObject();
                 obj.Add("maxPrice", Convert.ToString(((JObject)item)["maxPrice"]));
                 obj.Add("maxBuyer", Convert.ToString(((JObject)item)["maxBuyer"]));
@@ -275,8 +277,9 @@ namespace NEL_Agency_API.Controllers
                 long addPriceTime = getBlockTimeByBlokcIndex(blockHeightStrSt);
                 obj.Add("addPriceTime", addPriceTime);
                 return obj;
-            }).ToArray();
+            }).OrderByDescending(p => p["addPriceTime"]).ToArray();
 
+            /*
             // 阶梯计算出价总和
             JObject[][] arrSecond = arr.GroupBy(p => p["maxBuyer"], (k, g) =>
             {
@@ -290,6 +293,7 @@ namespace NEL_Agency_API.Controllers
                 }
                 return groupArr;
             }).ToArray();
+            
             List<JObject> listNew = new List<JObject>();
             foreach (var item in arrSecond)
             {
@@ -298,18 +302,19 @@ namespace NEL_Agency_API.Controllers
             
 
             // 倒叙排列
-            JObject[] res = listNew.OrderByDescending(p => p["addPriceTime"]).ToArray();
+            JObject[] res = arr.OrderByDescending(p => p["addPriceTime"]).ToArray();
+            */
 
             // 分页处理
             if (pageNum > 0 && pageSize > 0)
             {
                 int st = (pageNum - 1) * pageSize;
                 int ed = pageSize;
-                res =  res.Skip(st).Take(pageSize).ToArray();
+                arr =  arr.Skip(st).Take(pageSize).ToArray();
             }
             JObject rr = new JObject();
-            rr.Add("list", new JArray() { res });
-            rr.Add("count", listNew.Count);
+            rr.Add("list", new JArray() { arr });
+            rr.Add("count", queyBidDetailRes.Count);
             return new JArray() { rr };
         }
 
