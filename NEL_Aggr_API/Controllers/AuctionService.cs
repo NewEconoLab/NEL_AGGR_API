@@ -107,14 +107,14 @@ namespace NEL_Agency_API.Controllers
                 MyJson.JsonNode_Object queyBidDetailFilter = new MyJson.JsonNode_Object();
                 queyBidDetailFilter.Add("domain", new MyJson.JsonNode_ValueString(item.domain));
                 queyBidDetailFilter.Add("parenthash", new MyJson.JsonNode_ValueString(item.parenthash));
-                queyBidDetailFilter.Add("displayName", new MyJson.JsonNode_ValueString("addprice"));
+                //queyBidDetailFilter.Add("displayName", new MyJson.JsonNode_ValueString("addprice"));
                 //JArray queyBidDetailRes = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", queyBidDetailFilter.ToString());
                 JArray queyBidDetailRes = queryNofity(queryBidListCollection, queyBidDetailFilter.ToString());
 
                 // ChangeLog-st-20180628
                 // 1. 获取最大出价者
                 JToken maxPriceObj = queyBidDetailRes.OrderByDescending(maxPriceItem => int.Parse(Convert.ToString(maxPriceItem["maxPrice"])))/*.OrderBy(minBlockindexItem => Convert.ToString(minBlockindexItem["getTime"]))*/.ToArray()[0];
-
+                
 
                 // 2. 获取自己最高出价
                 JToken maxPriceSlf = queyBidDetailRes.Where(
@@ -141,6 +141,17 @@ namespace NEL_Agency_API.Controllers
                 long auctionSpentTime = getAuctionSpentTime(startAuctionTime);
                 string blockHeightStrEd = Convert.ToString(maxPriceObj["endBlock"]);
                 bool hasOnlyBidOpen = Convert.ToString(maxPriceObj["maxBuyer"]) == "";
+
+                string maxPrice = Convert.ToString(maxPriceObj["maxPrice"]);
+                List<JToken> endBlockToken = queyBidDetailRes.Where(pp => {
+                    return Convert.ToString(pp["maxPrice"]) == maxPrice 
+                    && Convert.ToString(pp["displayName"]) == "domainstate"
+                    && Convert.ToString(pp["endBlock"]) != "0"; }).ToList();
+                if(endBlockToken != null && endBlockToken.Count > 0)
+                {
+                    blockHeightStrEd = Convert.ToString(endBlockToken[0]["endBlock"]);
+                }
+
                 auctionState = getAuctionState(auctionSpentTime, blockHeightStrEd, hasOnlyBidOpen);
                 domainLastStateObj.Add("auctionState", auctionState);
                 // 4.竞拍最高价
@@ -395,7 +406,10 @@ namespace NEL_Agency_API.Controllers
             queyOwnerFilter.Add("parenthash", new MyJson.JsonNode_ValueString(parenthash));
             //JArray queryOwnerRes = queryNofity("0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", queyOwnerFilter.ToString());
             JArray queryOwnerRes = queryNofity(queryDomainCollection, queyOwnerFilter.ToString());
-            owner = queryOwnerRes[0]["owner"].ToString();
+            if(queryOwnerRes != null && queryOwnerRes.Count > 0)
+            {
+                owner = queryOwnerRes[0]["owner"].ToString();
+            }
             return owner;
         }
 
