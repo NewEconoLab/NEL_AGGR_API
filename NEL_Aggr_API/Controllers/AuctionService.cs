@@ -93,8 +93,7 @@ namespace NEL_Agency_API.Controllers
             MyJson.JsonNode_Object req = new MyJson.JsonNode_Object();
             req.Add("who", new MyJson.JsonNode_ValueString(address));
             req.Add("displayName", new MyJson.JsonNode_ValueString("addprice"));
-            //JArray arr = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", req.ToString());   // 第三个Coll
-            JArray arr = queryNofity(queryBidListCollection, req.ToString());   // 第三个Coll
+            JArray arr = queryNofity(queryBidListCollection, req.ToString());  
             
             //
             JObject[] res = arr.Select(s => new
@@ -107,8 +106,6 @@ namespace NEL_Agency_API.Controllers
                 MyJson.JsonNode_Object queyBidDetailFilter = new MyJson.JsonNode_Object();
                 queyBidDetailFilter.Add("domain", new MyJson.JsonNode_ValueString(item.domain));
                 queyBidDetailFilter.Add("parenthash", new MyJson.JsonNode_ValueString(item.parenthash));
-                //queyBidDetailFilter.Add("displayName", new MyJson.JsonNode_ValueString("addprice"));
-                //JArray queyBidDetailRes = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", queyBidDetailFilter.ToString());
                 JArray queyBidDetailRes = queryNofity(queryBidListCollection, queyBidDetailFilter.ToString());
 
                 // ChangeLog-st-20180628
@@ -273,7 +270,6 @@ namespace NEL_Agency_API.Controllers
             queyBidDetailFilter.Add("domain", new MyJson.JsonNode_ValueString(domainArr[0]));
             queyBidDetailFilter.Add("parenthash", new MyJson.JsonNode_ValueString(getNameHash(domainArr[1])));
             queyBidDetailFilter.Add("displayName", new MyJson.JsonNode_ValueString("addprice"));
-            //JArray queyBidDetailRes = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", queyBidDetailFilter.ToString());
             JArray queyBidDetailRes = queryNofity(queryBidListCollection, queyBidDetailFilter.ToString());
 
             // 获取与该域名相关数据
@@ -336,7 +332,6 @@ namespace NEL_Agency_API.Controllers
             MyJson.JsonNode_Object queyBidDetailFilter = new MyJson.JsonNode_Object();
             queyBidDetailFilter.Add("domain", new MyJson.JsonNode_ValueString(domainArr[0]));
             queyBidDetailFilter.Add("parenthash", new MyJson.JsonNode_ValueString(getNameHash(domainArr[1])));
-            //JArray queyBidDetailRes = queryNofity("0x505d66281afad9b78b73b84584e3d345463866f4", queyBidDetailFilter.ToString());
             JArray queyBidDetailRes = queryNofity(queryBidListCollection, queyBidDetailFilter.ToString());
 
             JObject res = queyBidDetailRes.Select(item =>
@@ -359,13 +354,7 @@ namespace NEL_Agency_API.Controllers
 
             string auctionState = getAuctionState(res["startBlockSelling"].ToString(), res["endBlock"].ToString());
             res.Add("auctionState", auctionState);
-
-            /*
-            // 更新出价总额
-            double maxPrice = queyBidDetailRes.Where(p => p["maxBuyer"].Equals(res["maxBuyer"])).Sum(p => double.Parse(Convert.ToString(p["maxPrice"])));
-            res.Remove("maxPrice");
-            res.Add("maxPrice", String.Format("{0:N8}", maxPrice));
-            */
+            
             res.Remove("startBlockSelling");
             res.Remove("endBlock");
 
