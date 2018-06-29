@@ -19,6 +19,7 @@ namespace NEL_Agency_API.Controllers
             JObject nameFilter = new JObject();
             JObject subNameFilter = new JObject();
             subNameFilter.Add("$regex", name);
+            subNameFilter.Add("$options", "i");
             nameFilter.Add("name.name", subNameFilter);
             JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "asset", "{}", pageSize, pageNum, nameFilter.ToString());
             if (res == null || res.Count == 0)
