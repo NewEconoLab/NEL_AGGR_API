@@ -58,8 +58,6 @@ namespace NEL_Agency_API.Controllers
             rr.Add("count", res.Count);
             return new JArray() { rr };
 
-            return new JArray();
-
         }
 
         private long getBlockTime(string blockHeightStrSt)
