@@ -290,9 +290,23 @@ namespace NEL_Agency_API.Controllers
                                 }
                             }
 
-                            domainList.Add(new JObject { { "domain", fullDomain }, { "resolver", resolver }, { "resolverAddress", resolverAddr }, { "ttl", ttl } });
+                            string getTime = Convert.ToString(((JObject)item)["getTime"]);
+
+                            domainList.Add(new JObject { { "domain", fullDomain }, { "resolver", resolver }, { "resolverAddress", resolverAddr }, { "ttl", ttl } , {"gettime", getTime}});
                         }
-                        result = new JArray { domainList.ToArray() };
+                        //result = new JArray { domainList.ToArray() };
+                        result = new JArray { domainList.GroupBy(item => Convert.ToString(((JObject)item)["domain"]), (k,g) => {
+                            JObject obj = new JObject();
+                            obj.Add("domain", k);
+
+                            JObject newest =  g.OrderBy(pItem => Convert.ToString(((JObject)pItem)["gettime"])).Last();
+                            obj.Add("resolver", newest["resolver"]);
+                            obj.Add("resolverAddress", newest["resolverAddress"]);
+                            obj.Add("ttl", newest["ttl"]);
+                            return obj;
+                        }).ToArray()
+                        
+                        };
                         break;
 
                     // 根据地址查询txid列表
