@@ -33,51 +33,153 @@ namespace NEL_Agency_API.Controllers
         
         public JArray getBidListByAddressLikeDomain(string address, string prefixDomain, int pageNum=0, int pageSize=0)
         {
-            JObject[] res = queryDomainList(address);
+            JObject[] res = queryDomainList2(address, pageNum, pageSize, prefixDomain);
             if (res == null || res.Length == 0)
             {
                 return new JArray() { };
             }
-
-            // 模糊匹配
-            res = res.Where(p => Convert.ToString(p["domain"]).StartsWith(prefixDomain)).ToArray();
-
-            // 分页处理
-            int sumCount = res.Count();
-            if (pageNum > 0 && pageSize > 0)
-            {
-                int st = (pageNum - 1) * pageSize;
-                int ed = pageSize;
-                res = res.Skip(st).Take(pageSize).ToArray();
-            }
             JObject rr = new JObject();
             rr.Add("list", new JArray() { res });
-            rr.Add("count", sumCount);
+            rr.Add("count", "");
             return new JArray() { rr };
         }
         
         public JArray getBidListByAddress(string address, int pageNum=0, int pageSize=0)
         {
-            JObject[] res = queryDomainList(address);
+            JObject[] res = queryDomainList2(address, pageNum, pageSize);
             if(res == null || res.Length == 0)
             {
                 return new JArray() { };
             }
-
-            // 分页处理
-            int sumCount = res.Count();
-            if (pageNum > 0 && pageSize > 0)
-            {
-                int st = (pageNum - 1) * pageSize;
-                int ed = pageSize;
-                res = res.Skip(st).Take(pageSize).ToArray();
-            }
             JObject rr = new JObject();
             rr.Add("list", new JArray() { res });
-            rr.Add("count", sumCount);
+            rr.Add("count", "");
 
 
             return new JArray() { rr }; 
+        }
+        private JObject[] queryDomainList2(string address, int pageNum, int pageSize, string prefixDomain = "")
+        {
+            JObject filter = new JObject();
+            filter.Add("who", address);
+            filter.Add("displayName", "addprice");
+            if(prefixDomain == "")
+            {
+                JObject likeFilter = new JObject();
+                likeFilter.Add("$regex", prefixDomain);
+                likeFilter.Add("$options", "i");
+                filter.Add("domain", likeFilter);
+            }
+
+            JArray arr = null;
+            if (pageNum < 1 || pageSize < 1)
+            {
+                arr = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, filter.ToString());
+            }
+            else
+            {
+                arr = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, filter.ToString());
+            }
+            var cc = arr.Select(s => new
+            {
+                domain = Convert.ToString(s["domain"]),
+                parenthash = Convert.ToString(s["parenthash"])
+            }).Distinct().ToArray();
+
+            JObject multiFilter = new JObject();
+            JArray multiFilterSub = new JArray();
+            foreach (var c in cc)
+            {
+                JObject obj = new JObject();
+                obj.Add("domain", c.domain);
+                obj.Add("parenthash", c.parenthash);
+                multiFilterSub.Add(obj);
+            }
+            multiFilter.Add("$or", multiFilterSub);
+            //JArray multiRes = queryNofity(queryBidListCollection, multiFilter.ToString());
+            JArray multiRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, multiFilter.ToString());
+            multiRes.GroupBy(item => item["domain"]).ToArray();
+            JObject[] res = multiRes.GroupBy(sp => sp["domain"], (k, g) =>
+            {
+                string domain = k.ToString();
+                return g.GroupBy(sp2 => sp2["parenthash"], (gk, gg) =>
+                {
+                    string parenthash = gk.ToString();
+                    // *. 获取最大出价者
+                    JToken maxPriceObj = gg.OrderByDescending(maxPriceItem => int.Parse(Convert.ToString(maxPriceItem["maxPrice"]))).ToArray()[0];
+                    // *. 获取自己最高出价
+                    JToken maxPriceSlf = gg.Where(
+                        slfItem => Convert.ToString(slfItem["maxBuyer"]) == address
+                        || Convert.ToString(slfItem["maxBuyer"]) == null
+                        || Convert.ToString(slfItem["maxBuyer"]) == ""
+                        ).OrderByDescending(maxPriceItem => int.Parse(Convert.ToString(maxPriceItem["maxPrice"]))).ToArray()[0];
+
+                    JObject domainLastStateObj = new JObject();
+                    // 1. 域名
+                    string fullDomain = domain + getParentDomainByParentHash(parenthash); // 父域名 + 子域名
+                    domainLastStateObj.Add("domain", fullDomain);
+                    // 2. 开标时间
+                    long startAuctionTime;
+                    String blockHeightStrSt = Convert.ToString(maxPriceSlf["startBlockSelling"]);
+                    startAuctionTime = getStartAuctionTime(blockHeightStrSt);
+                    domainLastStateObj.Add("startAuctionTime", startAuctionTime);
+                    // 3.状态(取值：竞拍中、随机中、结束三种，需根据开标时间计算，其中竞拍中为0~3天)
+                    // NotSelling           
+                    // SellingStepFix01     0~2天
+                    // SellingStepFix02     第三天
+                    // SellingStepRan       随机
+                    // EndSelling           结束-------endBlock
+                    string auctionState;
+                    long auctionSpentTime = getAuctionSpentTime(startAuctionTime);
+                    string blockHeightStrEd = Convert.ToString(maxPriceObj["endBlock"]);
+                    bool hasOnlyBidOpen = Convert.ToString(maxPriceObj["maxBuyer"]) == "";
+
+                    string maxPrice = Convert.ToString(maxPriceObj["maxPrice"]);
+                    List<JToken> endBlockToken = gg.Where(pp => {
+                        return Convert.ToString(pp["maxPrice"]) == maxPrice
+                        && Convert.ToString(pp["displayName"]) == "domainstate"
+                        && Convert.ToString(pp["endBlock"]) != "0";
+                    }).ToList();
+                    if (endBlockToken != null && endBlockToken.Count > 0)
+                    {
+                        blockHeightStrEd = Convert.ToString(endBlockToken[0]["endBlock"]);
+                    }
+
+                    auctionState = getAuctionState(auctionSpentTime, blockHeightStrEd, hasOnlyBidOpen);
+                    domainLastStateObj.Add("auctionState", auctionState);
+                    // 4.竞拍最高价
+                    domainLastStateObj.Add("maxPrice", Convert.ToString(maxPriceObj["maxPrice"]));
+
+                    // 5.竞拍最高价地址
+                    domainLastStateObj.Add("maxBuyer", Convert.ToString(maxPriceObj["maxBuyer"]));
+                    // 6.竞拍已耗时(竞拍中显示)
+                    if (auctionSpentTime < THREE_DAY_SECONDS)
+                    {
+                        domainLastStateObj.Add("auctionSpentTime", auctionSpentTime);
+                    }
+                    else
+                    {
+                        domainLastStateObj.Add("auctionSpentTime", auctionSpentTime - THREE_DAY_SECONDS);
+                    }
+                    // 7.域名所有者(竞拍结束显示)根据子域名和父域名哈希查询(从第一个Coll中查询)
+                    string owner = "";//
+                    if (isEndAuction(blockHeightStrEd))
+                    {
+                        owner = getOwnerByDomainAndParentHash(domain, parenthash);
+                        auctionSpentTime = getBlockTimeByBlokcIndex(blockHeightStrEd) - startAuctionTime - THREE_DAY_SECONDS;
+                        domainLastStateObj.Remove("auctionSpentTime");
+                        domainLastStateObj.Add("auctionSpentTime", auctionSpentTime);
+                    }
+                    domainLastStateObj.Add("owner", owner);
+
+                    domainLastStateObj.Add("blockindex", Convert.ToString(maxPriceObj["blockindex"]));
+                    domainLastStateObj.Add("id", Convert.ToString(maxPriceObj["id"]));
+
+                    return domainLastStateObj;
+
+                }).ToArray();
+            }).SelectMany(pItem => pItem).Where(p => Convert.ToString(p["auctionState"]) != canTryAgainBidFlag).OrderByDescending(q => q["blockindex"]).ToArray();
+            return res;
         }
         private JObject[] queryDomainList(string address)
         {
@@ -250,13 +352,8 @@ namespace NEL_Agency_API.Controllers
             }).Where(p => Convert.ToString(p["auctionState"]) != canTryAgainBidFlag).OrderByDescending(q => q["blockindex"]).ToArray();
             return res;
         }
-
-
-        public JArray getBidDetailByDomain(string domain)
-        {
-            return getBidDetailByDomain(domain, 0, 0);
-        }
-        public JArray getBidDetailByDomain(string domain, int pageNum, int pageSize)
+        
+        public JArray getBidDetailByDomain(string domain, int pageNum=0, int pageSize=0)
         {
             // 计算slfDomain + parentHash
             string[] domainArr = domain.Split(".");
