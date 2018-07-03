@@ -130,7 +130,7 @@ namespace NEL_Agency_API.Controllers
                     break;
                 }
                 Thread.Sleep(200);
-            } while (getBlockCount() <= curHeight + 1);
+            } while (getBlockCount() <= curHeight + 2);
             return flag;
         }
         private int getBlockCount()
