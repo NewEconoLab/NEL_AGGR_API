@@ -16,110 +16,48 @@ namespace NEL_Agency_API.Controllers
 
         public JArray fuzzySearchAsset(string name, int pageNum = 1, int pageSize = 6)
         {
-            // 转义
             JArray res1 = search(false, "asset", name, pageNum, pageSize);
-            // 非转义
-            JArray res2 = search(false, "asset", transferName(name), pageNum, pageSize);
-
-            // 转义
-            JArray res3 = search(true, "NEP5asset", name, pageNum, pageSize);
-            // 非转义
-            JArray res4 = search(true, "NEP5asset", transferName(name), pageNum, pageSize);
-
-            List<JToken> list = new List<JToken>();
+            JArray res2 = search(true, "NEP5asset", name, pageNum, pageSize);
+            List<JToken> list7 = new List<JToken>();
             foreach (var item in res1)
             {
-                list.Add(item);
+                list7.Add(item);
             }
             foreach (var item in res2)
             {
-                list.Add(item);
+                list7.Add(item);
             }
-            foreach (var item in res3)
-            {
-                list.Add(item);
-            }
-            foreach (var item in res4)
-            {
-                list.Add(item);
-            }
-
             return new JArray()
             {
-                list.GroupBy(item => item["assetid"], (k, g) =>
-                {
-                    JObject obj = new JObject();
-                    obj.Add("assetid", k);
-                    obj.Add("name", Convert.ToString(g.ToArray()[0]["name"]));
-                    return obj;
-                }).Take(pageSize).ToArray()
+                list7.Take(pageSize).ToArray()
             };
-        /*
-            list.GroupBy(item => item["assetid"], (k, g) =>
-            {
-                JObject obj = new JObject();
-                obj.Add("assetid", k);
-                obj.Add("name", Convert.ToString(g.ToArray()[0]["name"]));
-                return obj;
-            }).ToArray();
-            return new JArray() { list.Distinct().Take(pageSize).ToArray() };
-            */
-
-            /*
-
-            JObject nameFilter = new JObject();
-            JObject subNameFilter = new JObject();
-            subNameFilter.Add("$regex", transferName(name));
-            subNameFilter.Add("$options", "i");
-            nameFilter.Add("name.name", subNameFilter);
-            JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, "asset", "{}", pageSize, pageNum, nameFilter.ToString());
-            if (res == null || res.Count == 0)
-            {
-                return new JArray() { };
-            }
-
-            return new JArray() {{
-                res.SelectMany(item => {
-                    string id = Convert.ToString(item["id"]);
-                    return item["name"].Select(subItem =>
-                    {
-                        JObject obj = new JObject();
-                        obj.Add("assetid", id);
-                        obj.Add("name", transferRes(id, Convert.ToString(subItem["name"])));
-                        return obj;
-                    }).ToArray();
-                }).ToArray()
-            } };
-
-
-
-
-           */
-         
         }
         
-        private JArray search(bool isNep5, string coll, string name, int pageNum =1, int pageSize = 6)
+        private JObject newOrFilter(string key, string regex)
         {
-            JObject nameFilter = new JObject();
-            JObject subNameFilter = new JObject();
-            subNameFilter.Add("$regex", name);
-            subNameFilter.Add("$options", "i");
-            
-            if(isNep5)
-            {
-                nameFilter.Add("name", subNameFilter);
-            } else
-            {
-                nameFilter.Add("name.name", subNameFilter);
-            }
+            JObject obj = new JObject();
+            JObject subobj = new JObject();
+            subobj.Add("$regex", regex);
+            subobj.Add("$options", "i");
+            obj.Add(key, subobj);
+            return obj;
+        }
+        private JArray search(bool isNep5, string coll, string name, int pageNum = 1, int pageSize = 6)
+        {
+            string key = isNep5 ? "name" : "name.name";
+            JObject orFilter = new JObject();
+            JArray orFilterSub = new JArray();
+            orFilterSub.Add(newOrFilter(key, name));
+            orFilterSub.Add(newOrFilter(key, transferName(name)));
+            orFilter.Add("$or", orFilterSub);
 
-            JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, coll, "{}", pageSize, pageNum, nameFilter.ToString());
+            JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, coll, "{}", pageSize, pageNum, orFilter.ToString());
             if (res == null || res.Count == 0)
             {
                 return new JArray() { };
             }
 
-            if(isNep5)
+            if (isNep5)
             {
                 return new JArray() {{
                 res.Select(item => {
@@ -128,7 +66,7 @@ namespace NEL_Agency_API.Controllers
                     obj.Add("assetid", id);
                     obj.Add("name", transferRes(id, Convert.ToString(item["name"])));
                     return obj;
-                }).ToArray()
+                }).GroupBy(pItem => pItem["assetid"], (k,g) => g.ToArray()[0]).Where(pp => !isNeoOrGas(pp["assetid"].ToString())).ToArray()
             } };
             }
             return new JArray() {{
@@ -141,7 +79,7 @@ namespace NEL_Agency_API.Controllers
                         obj.Add("name", transferRes(id, Convert.ToString(subItem["name"])));
                         return obj;
                     }).ToArray();
-                }).ToArray()
+                }).GroupBy(pItem => pItem["assetid"], (k,g) => g.ToArray()[0]).ToArray()
             } };
         }
         
@@ -178,6 +116,14 @@ namespace NEL_Agency_API.Controllers
                 return "GAS";
             }
             return name;
+        }
+        private bool isNeoOrGas(string assetid)
+        {
+            if(assetid == id_gas || assetid == id_neo)
+            {
+                return true;
+            }
+            return false;
         }
         private string id_neo = "0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b";
         private string id_gas = "0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7";
