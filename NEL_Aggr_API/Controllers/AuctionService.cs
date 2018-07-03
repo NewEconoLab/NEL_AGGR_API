@@ -30,13 +30,8 @@ namespace NEL_Agency_API.Controllers
         {
             return auctionRecharge.getRechargeAndTransfer(txid);
         }
-
-
-        public JArray getBidListByAddressLikeDomain(string address, string prefixDomain)
-        {   
-            return getBidListByAddressLikeDomain(address, prefixDomain, 0, 0);
-        }
-        public JArray getBidListByAddressLikeDomain(string address, string prefixDomain, int pageNum, int pageSize)
+        
+        public JArray getBidListByAddressLikeDomain(string address, string prefixDomain, int pageNum=0, int pageSize=0)
         {
             JObject[] res = queryDomainList(address);
             if (res == null || res.Length == 0)
@@ -60,12 +55,8 @@ namespace NEL_Agency_API.Controllers
             rr.Add("count", sumCount);
             return new JArray() { rr };
         }
-
-        public JArray getBidListByAddress(string address)
-        {
-            return getBidListByAddress(address, 0, 0);
-        }
-        public JArray getBidListByAddress(string address, int pageNum, int pageSize)
+        
+        public JArray getBidListByAddress(string address, int pageNum=0, int pageSize=0)
         {
             JObject[] res = queryDomainList(address);
             if(res == null || res.Length == 0)
@@ -178,6 +169,9 @@ namespace NEL_Agency_API.Controllers
 
                 string blockindexStr = Convert.ToString(maxPriceObj["blockindex"]);
                 domainLastStateObj.Add("blockindex", blockindexStr);
+
+                domainLastStateObj.Add("id", Convert.ToString(maxPriceObj["id"]));
+
                 return domainLastStateObj;
                 // ChangeLog-ed-20180628
                 // ChangeLog-ed
