@@ -25,6 +25,8 @@ namespace NEL_Agency_API.Controllers
         private string queryDomainCollection { get; set; }
         private string queryTxidSetCollection { get; set; }
         private string queryBidListCollection { get; set; }
+
+        private string domainResolver { get; set; }
         
 
         private OssFileService ossClient;
@@ -85,6 +87,7 @@ namespace NEL_Agency_API.Controllers
                         mongodbDatabase = mh.mongodbDatabaseAtBlock_testnet,
                         mh = mh
                     };
+                    domainResolver = mh.domainResolver_testnet;
                     break;
                 case "mainnet":
                     mongodbConnStr = mh.mongodbConnStr_mainnet;
@@ -132,6 +135,7 @@ namespace NEL_Agency_API.Controllers
                         mongodbDatabase = mh.mongodbDatabaseAtBlock_mainnet,
                         mh = mh
                     };
+                    domainResolver = mh.domainResolver_mainnet;
                     break;
             }
         }
@@ -274,6 +278,23 @@ namespace NEL_Agency_API.Controllers
                             // 解析器、解析地址、过期时间
                             resolver = Convert.ToString(((JObject)item)["resolver"]);
                             resolverAddr = "";
+                            {
+                                var test = DomainHelper.nameHash(parentDomain.Substring(1));
+                                var a_test = DomainHelper.nameHashSub(test, slfDomain);
+                                // 获取解析器映射地址
+                                JObject resolverFilter = new JObject();
+                                resolverFilter.Add("namehash", a_test.ToString());
+                                resolverFilter.Add("protocol", "addr");
+                                JObject resolverSort = new JObject();
+                                resolverSort.Add("getTime", "-1");
+                                JArray resolverRes = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, domainResolver, resolverFilter.ToString());
+                                //JArray resolverRes = mh.GetDataPages(mongodbConnStr, mongodbDatabase, domainResolver, resolverSort.ToString(), 1, 1, resolverFilter.ToString());
+                                if (resolverRes != null && resolverRes.Count >= 1)
+                                {
+                                    JToken last = resolverRes.OrderByDescending(ppp => Convert.ToString(ppp["getTime"])).First();
+                                    resolverAddr = Convert.ToString(last["data"]);
+                                }
+                            }
                             ttl = Convert.ToString(((JObject)item)["TTL"]);
 
                             // filter: 过滤掉过期的且被他人再次使用的
@@ -282,7 +303,6 @@ namespace NEL_Agency_API.Controllers
                             if (expire != 0 && expire < nowtime)
                             {
                                 string filter = "{$and: [{\"domain\":\"" + slfDomain + "\"}" + "," + "{\"parenthash\":\"" + parentHash + "\"}" + "," + "{\"owner\":\"" + "{$not:" + req.@params[0] + "}" + "\"}" + "]}";
-                                //JArray queryDomainResFilter = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", filter);
                                 JArray queryDomainResFilter = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, queryDomainCollection, filter);
                                 if (queryDomainResFilter != null && queryDomainResFilter.Count() > 0)
                                 {

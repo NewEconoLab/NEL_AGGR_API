@@ -53,6 +53,9 @@ namespace NEL_Agency_API.lib
         public string rechargeCollection_mainnet = string.Empty;
         public string rechargeCollection_testnet = string.Empty;
 
+        public string domainResolver_testnet = string.Empty;
+        public string domainResolver_mainnet = string.Empty;
+
 
         public mongoHelper() {
             var config = new ConfigurationBuilder()
@@ -99,6 +102,9 @@ namespace NEL_Agency_API.lib
 
             rechargeCollection_mainnet = config["rechargeCollection_mainnet"];
             rechargeCollection_testnet = config["rechargeCollection_testnet"];
+
+            domainResolver_testnet = config["domainResolver_testnet"];
+            domainResolver_mainnet = config["domainResolver_mainnet"];
         }
 
         public JArray GetData(string mongodbConnStr,string mongodbDatabase, string coll,string findFliter)

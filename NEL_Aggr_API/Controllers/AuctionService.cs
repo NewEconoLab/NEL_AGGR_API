@@ -286,32 +286,6 @@ namespace NEL_Agency_API.Controllers
                 return obj;
             }).OrderByDescending(p => p["addPriceTime"]).ToArray();
 
-            /*
-            // 阶梯计算出价总和
-            JObject[][] arrSecond = arr.GroupBy(p => p["maxBuyer"], (k, g) =>
-            {
-                JObject[] groupArr = g.OrderBy(q => q["addPriceTime"]).ToArray();
-                double st = 0;
-                for(int i=0; i<groupArr.Length; ++i)
-                {
-                    st += double.Parse(Convert.ToString(groupArr[i]["maxPrice"])) ;
-                    groupArr[i].Remove("maxPrice");
-                    groupArr[i].Add("maxPrice", String.Format("{0:N8}", st));
-                }
-                return groupArr;
-            }).ToArray();
-            
-            List<JObject> listNew = new List<JObject>();
-            foreach (var item in arrSecond)
-            {
-                listNew.AddRange(item);
-            }
-            
-
-            // 倒叙排列
-            JObject[] res = arr.OrderByDescending(p => p["addPriceTime"]).ToArray();
-            */
-
             // 分页处理
             if (pageNum > 0 && pageSize > 0)
             {
@@ -369,7 +343,6 @@ namespace NEL_Agency_API.Controllers
             if (parentHash != "")
             {
                 string queryNameHash = "{\"namehash\":\"" + parentHash + "\"}";
-                //JArray queryDomainResSub = queryNofity("0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", queryNameHash);
                 JArray queryDomainResSub = queryNofity(queryDomainCollection, queryNameHash);
                 foreach (var dd in queryDomainResSub)
                 {
@@ -395,7 +368,6 @@ namespace NEL_Agency_API.Controllers
             MyJson.JsonNode_Object queyOwnerFilter = new MyJson.JsonNode_Object();
             queyOwnerFilter.Add("domain", new MyJson.JsonNode_ValueString(domain));
             queyOwnerFilter.Add("parenthash", new MyJson.JsonNode_ValueString(parenthash));
-            //JArray queryOwnerRes = queryNofity("0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916", queyOwnerFilter.ToString());
             JArray queryOwnerRes = queryNofity(queryDomainCollection, queyOwnerFilter.ToString());
             if(queryOwnerRes != null && queryOwnerRes.Count > 0)
             {
