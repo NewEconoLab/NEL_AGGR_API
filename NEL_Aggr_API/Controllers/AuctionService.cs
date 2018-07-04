@@ -440,34 +440,27 @@ namespace NEL_Agency_API.Controllers
 
         public JArray getBidResByDomain(string domain)
         {
-            // 计算slfDomain + parentHash
             string[] domainArr = domain.Split(".");
-            MyJson.JsonNode_Object queyBidDetailFilter = new MyJson.JsonNode_Object();
-            queyBidDetailFilter.Add("domain", new MyJson.JsonNode_ValueString(domainArr[0]));
-            queyBidDetailFilter.Add("parenthash", new MyJson.JsonNode_ValueString(getNameHash(domainArr[1])));
-            JArray queyBidDetailRes = queryNofity(queryBidListCollection, queyBidDetailFilter.ToString());
-
-            JObject res = queyBidDetailRes.Select(item =>
+            JObject filter = new JObject();
+            filter.Add("domain", domainArr[0]);
+            filter.Add("parenthash", getNameHash(domainArr[1]).ToString());
+            JObject fields = new JObject();
+            fields.Add("maxPrice", 1);
+            fields.Add("maxBuyer", 1);
+            fields.Add("blockindex", 1);
+            fields.Add("startBlockSelling", 1);
+            fields.Add("endBlock", 1);
+            JObject sort = new JObject();
+            sort.Add("blockindex", -1);
+            sort.Add("getTime", -1);
+            JArray queryRes = mh.GetDataPages(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, sort.ToString(), 1, 1, fields.ToString(), filter.ToString());
+            if (queryRes == null || queryRes.Count == 0)
             {
-                JObject obj = new JObject();
-                obj.Add("maxPrice", Convert.ToString(((JObject)item)["maxPrice"]));
-                obj.Add("maxBuyer", Convert.ToString(((JObject)item)["maxBuyer"]));
-
-                // 根据blockindex获取block.time即为加价时间
-                String blockHeightStrSt = Convert.ToString(((JObject)item)["blockindex"]);
-                string blockHeightFilter = "{\"index\":" + long.Parse(blockHeightStrSt) + "}";
-                JArray queryBlockRes = queryBlock("block", blockHeightFilter);
-                long addPriceTime = long.Parse(Convert.ToString(queryBlockRes[0]["time"]));
-                obj.Add("addPriceTime", addPriceTime);
-                // 用户获取状态值判断条件
-                obj.Add("startBlockSelling", Convert.ToString(((JObject)item)["startBlockSelling"]));
-                obj.Add("endBlock", Convert.ToString(((JObject)item)["endBlock"]));
-                return obj;
-            }).OrderByDescending(p => p["addPriceTime"]).ToArray()[0];
-
+                return new JArray() { };
+            }
+            JObject res = (JObject)queryRes[0];
             string auctionState = getAuctionState(res["startBlockSelling"].ToString(), res["endBlock"].ToString());
             res.Add("auctionState", auctionState);
-            
             res.Remove("startBlockSelling");
             res.Remove("endBlock");
 
