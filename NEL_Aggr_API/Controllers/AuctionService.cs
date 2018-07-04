@@ -58,8 +58,10 @@ namespace NEL_Agency_API.Controllers
 
             return new JArray() { rr }; 
         }
+
         private JObject[] queryDomainList2(string address, int pageNum, int pageSize, string prefixDomain = "")
         {
+            //breakPoint();   // add time point
             JObject filter = new JObject();
             filter.Add("who", address);
             filter.Add("displayName", "addprice");
@@ -70,7 +72,7 @@ namespace NEL_Agency_API.Controllers
                 likeFilter.Add("$options", "i");
                 filter.Add("domain", likeFilter);
             }
-
+            //breakPoint();   // add time point
             JArray arr = null;
             if (pageNum < 1 || pageSize < 1)
             {
@@ -78,14 +80,19 @@ namespace NEL_Agency_API.Controllers
             }
             else
             {
-                arr = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, filter.ToString());
+                arr = mh.GetDataPages(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, "{}", pageSize, pageNum, filter.ToString());
             }
+            if(arr.Count == 0)
+            {
+                return new JObject[0];
+            }
+            //breakPoint();   // add time point
             var cc = arr.Select(s => new
             {
                 domain = Convert.ToString(s["domain"]),
                 parenthash = Convert.ToString(s["parenthash"])
-            }).Distinct().ToArray();
-
+            }).GroupBy(p => p.domain, (k,g) => g.ToArray()[0]).ToArray();
+            //breakPoint();   // add time point
             JObject multiFilter = new JObject();
             JArray multiFilterSub = new JArray();
             foreach (var c in cc)
@@ -96,15 +103,22 @@ namespace NEL_Agency_API.Controllers
                 multiFilterSub.Add(obj);
             }
             multiFilter.Add("$or", multiFilterSub);
+            //breakPoint();   // add time point
             //JArray multiRes = queryNofity(queryBidListCollection, multiFilter.ToString());
             JArray multiRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, multiFilter.ToString());
-            multiRes.GroupBy(item => item["domain"]).ToArray();
+            //breakPoint();
             JObject[] res = multiRes.GroupBy(sp => sp["domain"], (k, g) =>
             {
                 string domain = k.ToString();
-                return g.GroupBy(sp2 => sp2["parenthash"], (gk, gg) =>
+                string[] parenthashArr = g.Select(phItem => phItem["parenthash"].ToString()).Distinct().ToArray();
+                //breakPoint2();
+                Dictionary<string, string> phdict = getParentDomainByParentHash(parenthashArr);
+                //breakPoint2();
+                var rr= g.GroupBy(sp2 => sp2["parenthash"], (gk, gg) =>
                 {
+                    //TimeCollector tt = new TimeCollector();
                     string parenthash = gk.ToString();
+                    /*
                     // *. 获取最大出价者
                     JToken maxPriceObj = gg.OrderByDescending(maxPriceItem => int.Parse(Convert.ToString(maxPriceItem["maxPrice"]))).ToArray()[0];
                     // *. 获取自己最高出价
@@ -113,16 +127,29 @@ namespace NEL_Agency_API.Controllers
                         || Convert.ToString(slfItem["maxBuyer"]) == null
                         || Convert.ToString(slfItem["maxBuyer"]) == ""
                         ).OrderByDescending(maxPriceItem => int.Parse(Convert.ToString(maxPriceItem["maxPrice"]))).ToArray()[0];
+                    */
+                    //tt.breakPoint();
+                    JToken[] maxPriceArr = gg.OrderByDescending(maxPriceItem => int.Parse(Convert.ToString(maxPriceItem["maxPrice"]))).ToArray();
+                    //tt.breakPoint();
+                    JToken maxPriceObj = maxPriceArr[0];
+                    JToken maxPriceSlf = maxPriceArr.Where(
+                        slfItem => Convert.ToString(slfItem["maxBuyer"]) == address
+                        || Convert.ToString(slfItem["maxBuyer"]) == null
+                        || Convert.ToString(slfItem["maxBuyer"]) == ""
+                        ).ToArray()[0];
 
+                    //tt.breakPoint();
                     JObject domainLastStateObj = new JObject();
                     // 1. 域名
-                    string fullDomain = domain + getParentDomainByParentHash(parenthash); // 父域名 + 子域名
+                    string fullDomain = domain + phdict.GetValueOrDefault(parenthash); // 父域名 + 子域名
                     domainLastStateObj.Add("domain", fullDomain);
+                    //tt.breakPoint();
                     // 2. 开标时间
                     long startAuctionTime;
                     String blockHeightStrSt = Convert.ToString(maxPriceSlf["startBlockSelling"]);
                     startAuctionTime = getStartAuctionTime(blockHeightStrSt);
                     domainLastStateObj.Add("startAuctionTime", startAuctionTime);
+                    //tt.breakPoint();
                     // 3.状态(取值：竞拍中、随机中、结束三种，需根据开标时间计算，其中竞拍中为0~3天)
                     // NotSelling           
                     // SellingStepFix01     0~2天
@@ -144,9 +171,10 @@ namespace NEL_Agency_API.Controllers
                     {
                         blockHeightStrEd = Convert.ToString(endBlockToken[0]["endBlock"]);
                     }
-
+                    //tt.breakPoint();
                     auctionState = getAuctionState(auctionSpentTime, blockHeightStrEd, hasOnlyBidOpen);
                     domainLastStateObj.Add("auctionState", auctionState);
+                    //tt.breakPoint();
                     // 4.竞拍最高价
                     domainLastStateObj.Add("maxPrice", Convert.ToString(maxPriceObj["maxPrice"]));
 
@@ -161,24 +189,35 @@ namespace NEL_Agency_API.Controllers
                     {
                         domainLastStateObj.Add("auctionSpentTime", auctionSpentTime - THREE_DAY_SECONDS);
                     }
+                    //tt.breakPoint();
                     // 7.域名所有者(竞拍结束显示)根据子域名和父域名哈希查询(从第一个Coll中查询)
                     string owner = "";//
                     if (isEndAuction(blockHeightStrEd))
                     {
                         owner = getOwnerByDomainAndParentHash(domain, parenthash);
+                        //tt.breakPoint();
                         auctionSpentTime = getBlockTimeByBlokcIndex(blockHeightStrEd) - startAuctionTime - THREE_DAY_SECONDS;
                         domainLastStateObj.Remove("auctionSpentTime");
+                        //tt.breakPoint();
                         domainLastStateObj.Add("auctionSpentTime", auctionSpentTime);
                     }
+                    //tt.breakPoint();
+
                     domainLastStateObj.Add("owner", owner);
 
                     domainLastStateObj.Add("blockindex", Convert.ToString(maxPriceObj["blockindex"]));
                     domainLastStateObj.Add("id", Convert.ToString(maxPriceObj["id"]));
-
+                    //tt.breakPointEnd();
+                    //timeCollectorList.Add(tt.getRes());
                     return domainLastStateObj;
 
                 }).ToArray();
+                //breakPoint2();
+                //breakPointEnd2();
+                return rr;
             }).SelectMany(pItem => pItem).Where(p => Convert.ToString(p["auctionState"]) != canTryAgainBidFlag).OrderByDescending(q => q["blockindex"]).ToArray();
+            //breakPoint();   // add time point
+            //breakPointEnd();   // add time point
             return res;
         }
         private JObject[] queryDomainList(string address)
@@ -361,14 +400,29 @@ namespace NEL_Agency_API.Controllers
             queyBidDetailFilter.Add("domain", new MyJson.JsonNode_ValueString(domainArr[0]));
             queyBidDetailFilter.Add("parenthash", new MyJson.JsonNode_ValueString(getNameHash(domainArr[1])));
             queyBidDetailFilter.Add("displayName", new MyJson.JsonNode_ValueString("addprice"));
-            JArray queyBidDetailRes = queryNofity(queryBidListCollection, queyBidDetailFilter.ToString());
+            //JArray queyBidDetailRes = queryNofity(queryBidListCollection, queyBidDetailFilter.ToString());
+            JArray queryBidDetailRes = mh.GetDataPages(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, "{}", pageSize, pageNum, queyBidDetailFilter.ToString());
 
             // 获取与该域名相关数据
-            JObject[] arr = queyBidDetailRes.Select(item =>
-            {
+            /*
+            JObject[] arr = queryBidDetailRes.Where(pItem => 
+                pItem["maxBuyer"].ToString() == pItem["who"].ToString()
+                || pItem["maxBuyer"].ToString() == ""
+                || pItem["maxBuyer"].ToString() == null).Select(item =>
+                */
+            JObject[] arr = queryBidDetailRes.Select(item => {
+                string maxPrice = item["maxPrice"].ToString();
+                string maxBuyer = item["maxBuyer"].ToString();
+                string who = item["who"].ToString();
+                if (maxBuyer != who)
+                {
+                    maxBuyer = who;
+                    maxPrice = Convert.ToString(queryBidDetailRes.Where(pItem => pItem["who"].ToString() == who && int.Parse(pItem["blockindex"].ToString()) <= int.Parse(item["blockindex"].ToString())).Sum(ppItem => int.Parse(ppItem["value"].ToString())));
+
+                }
                 JObject obj = new JObject();
-                obj.Add("maxPrice", Convert.ToString(((JObject)item)["maxPrice"]));
-                obj.Add("maxBuyer", Convert.ToString(((JObject)item)["maxBuyer"]));
+                obj.Add("maxPrice", maxPrice);
+                obj.Add("maxBuyer", maxBuyer);
 
                 // 根据blockindex获取block.time即为加价时间
                 String blockHeightStrSt = Convert.ToString(((JObject)item)["blockindex"]);
@@ -377,16 +431,10 @@ namespace NEL_Agency_API.Controllers
                 return obj;
             }).OrderByDescending(p => p["addPriceTime"]).ToArray();
 
-            // 分页处理
-            if (pageNum > 0 && pageSize > 0)
-            {
-                int st = (pageNum - 1) * pageSize;
-                int ed = pageSize;
-                arr =  arr.Skip(st).Take(pageSize).ToArray();
-            }
+            long count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, queyBidDetailFilter.ToString());
             JObject rr = new JObject();
             rr.Add("list", new JArray() { arr });
-            rr.Add("count", queyBidDetailRes.Count);
+            rr.Add("count", count);
             return new JArray() { rr };
         }
 
@@ -427,7 +475,27 @@ namespace NEL_Agency_API.Controllers
         }
 
 
+        private Dictionary<string,string> getParentDomainByParentHash(string[] parentHashArr)
+        {
+            JObject filter = new JObject();
+            JArray filterSub = new JArray();
+            foreach (string parentHash in parentHashArr)
+            {
+                JObject obj = new JObject();
+                obj.Add("namehash", parentHash);
+                filterSub.Add(obj);
+            }
+            filter.Add("$or", filterSub);
 
+            JArray res = queryNofity(queryDomainCollection, filter.ToString());
+            return res.GroupBy(item => item["namehash"], (k, g) =>
+            {
+                JObject obj = new JObject();
+                obj.Add("namehash", k.ToString());
+                obj.Add("domain", "." + g.ToArray()[0]["domain"].ToString());
+                return obj;
+            }).ToArray().ToDictionary(key => key["namehash"].ToString(), val => val["domain"].ToString());
+        }
         private string getParentDomainByParentHash(string parentHash)
         {
             string parentDomain = "";
@@ -534,14 +602,5 @@ namespace NEL_Agency_API.Controllers
             return mh.GetData(Block_mongodbConnStr, Block_mongodbDatabase, coll, filter);
         }
 
-    }
-    class JObjectComparer : IComparer<JToken>
-    {
-        public string key { set; get; }
-
-        public int Compare(JToken x, JToken y)
-        {
-            return string.Compare(Convert.ToString(y[key]), Convert.ToString(x[key]));
-        }
     }
 }
