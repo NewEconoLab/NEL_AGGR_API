@@ -152,7 +152,7 @@ namespace NEL_Agency_API.lib
             else { return new JArray(); }
         }
 
-        public JArray GetDataPages(string mongodbConnStr, string mongodbDatabase, string coll, string sortStr, int pageCount, int pageNum, string fieldBson, string findBson = "{}")
+        public JArray GetDataPagesWithField(string mongodbConnStr, string mongodbDatabase, string coll, string fieldBson, int pageCount, int pageNum, string sortStr = "{}", string findBson = "{}")
         {
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
@@ -163,7 +163,27 @@ namespace NEL_Agency_API.lib
 
             if (query.Count > 0)
             {
+                var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+                JArray JA = JArray.Parse(query.ToJson(jsonWriterSettings));
+                foreach (JObject j in JA)
+                {
+                    j.Remove("_id");
+                }
+                return JA;
+            }
+            else { return new JArray(); }
+        }
+        public JArray GetDataWithField(string mongodbConnStr, string mongodbDatabase, string coll, string fieldBson, string findBson = "{}")
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>(coll);
 
+            List<BsonDocument> query = collection.Find(BsonDocument.Parse(findBson)).Project(BsonDocument.Parse(fieldBson)).ToList();
+            client = null;
+
+            if (query.Count > 0)
+            {
                 var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
                 JArray JA = JArray.Parse(query.ToJson(jsonWriterSettings));
                 foreach (JObject j in JA)
