@@ -74,7 +74,7 @@ namespace NEL_Agency_API.Controllers
             //去重
             JArray rr = new JArray() { queryRes.GroupBy(item => item["domain"], (k, g) => g.ToArray()[0]).OrderByDescending(pItem => pItem["blockindex"]).ToArray() };
             count = rr.Count();
-            if(count > pageSize)
+            if (count > pageSize)
             {
                 int skip = pageSize * (pageNum - 1);
                 for (int i = 0; i < skip; ++i)
@@ -87,8 +87,10 @@ namespace NEL_Agency_API.Controllers
                 }
             }
 
+
             // 域名终值
-            JObject multiFilter = new JObject() { { "$or", rr } };
+            JObject multiFilter = new JObject() { { "$or", new JArray() { rr.Select(item => { ((JObject)item).Remove("blockindex"); return item; }).ToArray()}
+        } };
             JArray multiRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, multiFilter.ToString());
 
             // 所有parenthash
@@ -97,7 +99,8 @@ namespace NEL_Agency_API.Controllers
 
             // 所有区块索引
             long[] blockindexArr = multiRes.Select(item => long.Parse(item["startBlockSelling"].ToString())).Distinct().ToArray();
-            blockindexArr.Concat(multiRes.Select(item => long.Parse(item["endBlock"].ToString())).Distinct().ToArray());
+            long[] cc = multiRes.Select(item => long.Parse(item["endBlock"].ToString())).Distinct().ToArray();
+            blockindexArr = blockindexArr.Concat(multiRes.Select(item => long.Parse(item["endBlock"].ToString())).Distinct().ToArray()).ToArray();
             Dictionary<string, long> blockindexDict = getBlockTimeByIndex(blockindexArr.Distinct().ToArray());
 
             JObject[] res = multiRes.GroupBy(item => item["domain"], (k, g) =>
@@ -180,11 +183,11 @@ namespace NEL_Agency_API.Controllers
             }).SelectMany(pItem => pItem).Where(p => Convert.ToString(p["auctionState"]) != canTryAgainBidFlag).OrderByDescending(q => q["blockindex"]).ToArray(); ;
 
             // 中标域名添加owner
-            JObject[] needAddOwnerArr = res.Where(item => isEndAuction(item["endBlock"].ToString())).Select(pItem => new JObject() { { "domain", pItem["domainsub"].ToString() }, { "parenthash", pItem["parenthash"].ToString() } }).ToArray();
+            JObject[] needAddOwnerArr = res.Where(item => item["auctionState"].ToString() == "0").Select(pItem => new JObject() { { "domain", pItem["domainsub"].ToString() }, { "parenthash", pItem["parenthash"].ToString() } }).ToArray();
             bool hasEndBlock = needAddOwnerArr.Count() != 0;
             Dictionary<string,string> ownerDict = getOwnerByDomainAndParentHash(needAddOwnerArr);
             return res.Select(item => {
-                if(hasEndBlock && isEndAuction(item["endBlock"].ToString()))
+                if(hasEndBlock && item["auctionState"].ToString() == "0")
                 {
                     string domainsub = item["domainsub"].ToString();
                     string parenthash = item["parenthash"].ToString();
@@ -340,12 +343,14 @@ namespace NEL_Agency_API.Controllers
             }
             JObject filter = domainAndParenthashArr.Count() == 1 ? domainAndParenthashArr[0]
                     : new JObject() { { "$or", new JArray() { domainAndParenthashArr } } };
-            JObject fieldFilter = new JObject() { { "owner", 1 } };
+            JObject fieldFilter = new JObject() { { "domain", 1 }, { "parenthash", 1 }, { "owner", 1 }, { "blockindex", 1 } };
             JObject sortBy = new JObject() { { "blockindex",-1} };
-            JArray res = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, queryDomainCollection, fieldFilter.ToString(), 1,1, sortBy.ToString(), filter.ToString());
+            JArray res = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, queryDomainCollection, fieldFilter.ToString(), filter.ToString());
             if (res != null && res.Count > 0)
             {
-                return res.Select(item => new JObject() {
+                return res.GroupBy(item => item["domain"], (k,g)=> {
+                    return g.GroupBy(pItem => pItem["parenthash"], (kk, gg) => gg.OrderByDescending(ppItem => ppItem["blockindex"]).ToArray()[0]).ToArray();
+                }).SelectMany(qq => qq).Select(item => new JObject() {
                     { "domain", Convert.ToString(item["domain"]) },
                     { "parenthash", Convert.ToString(item["parenthash"]) },
                     { "owner", Convert.ToString(item["owner"]) } }).ToArray().ToDictionary(key => key["domain"].ToString() + key["parenthash"].ToString(), val => val["owner"].ToString());
@@ -372,10 +377,16 @@ namespace NEL_Agency_API.Controllers
                     // 随机
                     auctionState = "2";// "Random period";
 
-                    if (hasOnlyBidOpen &&auctionSpentTime > FIVE_DAY_SECONDS)
+                    if (hasOnlyBidOpen && auctionSpentTime > FIVE_DAY_SECONDS)
                     {
                         // 流拍
                         auctionState = canTryAgainBidFlag;
+                    }
+                    if(!hasOnlyBidOpen && auctionSpentTime > FIVE_DAY_SECONDS)
+                    {
+                        // 结束
+                        auctionState = "0";// "Ended";
+
                     }
                 }
                 else
