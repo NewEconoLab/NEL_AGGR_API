@@ -833,7 +833,8 @@ namespace NEL_Agency_API.Controllers
                         // 上传Oss
                         pathScript = "";
                         ossClient.OssFileUpload(System.IO.Path.Combine(pathScript, str_hash + ".avm"), str_avm);
-                        ossClient.OssFileUpload(System.IO.Path.Combine(pathScript, str_hash + ".cs"), Uri.UnescapeDataString(str_cs));
+                        //ossClient.OssFileUpload(System.IO.Path.Combine(pathScript, str_hash + ".cs"), Uri.UnescapeDataString(str_cs));
+                        ossClient.OssFileUpload(System.IO.Path.Combine(pathScript, str_hash + ".cs"), str_cs);
                         ossClient.OssFileUpload(System.IO.Path.Combine(pathScript, str_hash + ".map.json"), JO_map.ToString());
                         ossClient.OssFileUpload(System.IO.Path.Combine(pathScript, str_hash + ".abi.json"), JO_abi.ToString());
                         result = getJAbyKV("result", "suc");
