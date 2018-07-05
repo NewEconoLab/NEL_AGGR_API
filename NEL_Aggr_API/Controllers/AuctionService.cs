@@ -12,6 +12,7 @@ namespace NEL_Agency_API.Controllers
     public class AuctionService
     {
         private long THREE_DAY_SECONDS = 3 * /*24 * 60 * */60 /*测试时5分钟一天*/* 5;
+        private long TWO_DAY_SECONDS = 2 * /*24 * 60 * */60 /*测试时5分钟一天*/* 5;
         private long FIVE_DAY_SECONDS = 5 * /*24 * 60 * */60 /*测试时5分钟一天*/ * 5;
         public string Notify_mongodbConnStr { set; get; }
         public string Notify_mongodbDatabase { set; get; }
@@ -197,7 +198,8 @@ namespace NEL_Agency_API.Controllers
                     // 竞拍结束，更新已过时间
                     long startAuctionTime = int.Parse(Convert.ToString(item["startAuctionTime"]));
                     string endBlock = item["endBlock"].ToString();
-                    long auctionSpentTime = blockindexDict.GetValueOrDefault(endBlock) - startAuctionTime - THREE_DAY_SECONDS;
+                    
+                    long auctionSpentTime = !isEndAuction(endBlock) ? TWO_DAY_SECONDS :blockindexDict.GetValueOrDefault(endBlock) - startAuctionTime - THREE_DAY_SECONDS;
                     item.Remove("auctionSpentTime");
                     item.Add("auctionSpentTime", auctionSpentTime);
                 } 
