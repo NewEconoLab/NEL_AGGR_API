@@ -110,9 +110,9 @@ namespace NEL_Agency_API.Controllers
                 return g.GroupBy(pItem => pItem["parenthash"], (kk, gg) => 
                 {
                     string parenthash = kk.ToString();
-                    JToken[] maxPriceArr = gg.OrderByDescending(maxPriceItem => int.Parse(Convert.ToString(maxPriceItem["maxPrice"]))).ToArray();
-                    JToken maxPriceObj = gg.OrderByDescending(maxPriceItem => int.Parse(Convert.ToString(maxPriceItem["maxPrice"]))).ToArray()[0];
-                    JToken maxPriceSlf = gg.Where(addpriceItem => addpriceItem["displayName"].ToString() == "addprice").OrderByDescending(maxPriceItem => int.Parse(Convert.ToString(maxPriceItem["maxPrice"]))).ToArray().Where(slfItem => 
+                    JToken[] maxPriceArr = gg.OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).ToArray();
+                    JToken maxPriceObj = gg.OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).ToArray()[0];
+                    JToken maxPriceSlf = gg.Where(addpriceItem => addpriceItem["displayName"].ToString() == "addprice").OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).ToArray().Where(slfItem => 
                         Convert.ToString(slfItem["maxBuyer"]) == address
                         || Convert.ToString(slfItem["maxBuyer"]) == null
                         || Convert.ToString(slfItem["maxBuyer"]) == ""
@@ -181,7 +181,7 @@ namespace NEL_Agency_API.Controllers
 
                     return obj;
                 }).ToArray();
-            }).SelectMany(pItem => pItem).Where(p => Convert.ToString(p["auctionState"]) != canTryAgainBidFlag).OrderByDescending(q => q["blockindex"]).ToArray(); ;
+            }).SelectMany(pItem => pItem).Where(p => Convert.ToString(p["auctionState"]) != canTryAgainBidFlag && Convert.ToString(p["maxPrice"]) != "0").OrderByDescending(q => q["blockindex"]).ToArray(); ;
 
             // 中标域名添加owner
             JObject[] needAddOwnerArr = res.Where(item => item["auctionState"].ToString() == "0").Select(pItem => new JObject() { { "domain", pItem["domainsub"].ToString() }, { "parenthash", pItem["parenthash"].ToString() } }).ToArray();
@@ -418,7 +418,7 @@ namespace NEL_Agency_API.Controllers
         
         private long getAuctionSpentTime(long startAuctionTime)
         {
-            System.DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new System.DateTime(1970, 1, 1)); // 当地时区
+            DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1)); // 当地时区
             long timeStamp = (long)(DateTime.Now - startTime).TotalSeconds; // 相差秒数
             return timeStamp - startAuctionTime;
         }
