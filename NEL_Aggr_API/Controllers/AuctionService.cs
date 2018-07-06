@@ -239,7 +239,7 @@ namespace NEL_Agency_API.Controllers
                 long addPriceTime = blocktimeDict.GetValueOrDefault(Convert.ToString(item["blockindex"]));
                 return new JObject() { { "maxPrice", maxPrice }, { "maxBuyer", maxBuyer }, { "addPriceTime", addPriceTime } };
 
-            }).Where(p => Convert.ToString(p["maxPrice"]) != "0").OrderByDescending(p => p["addPriceTime"]).Skip(pageSize*(pageNum-1)).Take(pageSize).ToArray();
+            }).Where(p => Convert.ToString(p["maxPrice"]) != "0").OrderByDescending(p => p["addPriceTime"]).ThenByDescending(p => int.Parse(p["maxPrice"].ToString())).Skip(pageSize*(pageNum-1)).Take(pageSize).ToArray();
             long count = queryRes.Count;
             JObject res = new JObject();
             res.Add("list", new JArray() { arr });
