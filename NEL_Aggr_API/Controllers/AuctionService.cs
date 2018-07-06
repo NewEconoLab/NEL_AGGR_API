@@ -216,7 +216,8 @@ namespace NEL_Agency_API.Controllers
             filter.Add("domain", domainArr[0]);
             filter.Add("parenthash", getNameHash(domainArr[1]));
             filter.Add("displayName", "addprice");
-            JArray queryRes = mh.GetDataPages(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, "{}", pageSize, pageNum, filter.ToString());
+            // 累加value需要查询所有记录
+            JArray queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, filter.ToString()); 
             if (queryRes == null || queryRes.Count == 0)
             {
                 return new JArray() { };
@@ -238,8 +239,8 @@ namespace NEL_Agency_API.Controllers
                 long addPriceTime = blocktimeDict.GetValueOrDefault(Convert.ToString(item["blockindex"]));
                 return new JObject() { { "maxPrice", maxPrice }, { "maxBuyer", maxBuyer }, { "addPriceTime", addPriceTime } };
 
-            }).OrderByDescending(p => p["addPriceTime"]).ToArray();
-            long count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, filter.ToString());
+            }).OrderByDescending(p => p["addPriceTime"]).Skip(pageSize*(pageNum-1)).Take(pageSize).ToArray();
+            long count = queryRes.Count;
             JObject res = new JObject();
             res.Add("list", new JArray() { arr });
             res.Add("count", count);
