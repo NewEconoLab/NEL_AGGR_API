@@ -181,7 +181,7 @@ namespace NEL_Agency_API.Controllers
 
                     return obj;
                 }).ToArray();
-            }).SelectMany(pItem => pItem).Where(p => Convert.ToString(p["auctionState"]) != canTryAgainBidFlag && Convert.ToString(p["maxPrice"]) != "0").OrderByDescending(q => q["blockindex"]).ToArray(); ;
+            }).SelectMany(pItem => pItem).Where(p => Convert.ToString(p["auctionState"]) != canTryAgainBidFlag).OrderByDescending(q => q["blockindex"]).ToArray(); ;
 
             // 中标域名添加owner
             JObject[] needAddOwnerArr = res.Where(item => item["auctionState"].ToString() == "0").Select(pItem => new JObject() { { "domain", pItem["domainsub"].ToString() }, { "parenthash", pItem["parenthash"].ToString() } }).ToArray();
@@ -239,7 +239,7 @@ namespace NEL_Agency_API.Controllers
                 long addPriceTime = blocktimeDict.GetValueOrDefault(Convert.ToString(item["blockindex"]));
                 return new JObject() { { "maxPrice", maxPrice }, { "maxBuyer", maxBuyer }, { "addPriceTime", addPriceTime } };
 
-            }).OrderByDescending(p => p["addPriceTime"]).Skip(pageSize*(pageNum-1)).Take(pageSize).ToArray();
+            }).Where(p => Convert.ToString(p["maxPrice"]) != "0").OrderByDescending(p => p["addPriceTime"]).Skip(pageSize*(pageNum-1)).Take(pageSize).ToArray();
             long count = queryRes.Count;
             JObject res = new JObject();
             res.Add("list", new JArray() { arr });
