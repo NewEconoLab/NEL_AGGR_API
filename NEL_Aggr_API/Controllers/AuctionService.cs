@@ -209,6 +209,39 @@ namespace NEL_Agency_API.Controllers
             }).ToArray();
         }
 
+
+        public JArray getDomainInfoByAddress(string address, string domain)
+        {
+            string[] domainArr = domain.Split(".");
+            JObject filter = new JObject();
+            filter.Add("domain", domainArr[0]);
+            filter.Add("parenthash", getNameHash(domainArr[1]));
+            filter.Add("displayName", "addprice");
+            JObject sortBy = new JObject() { { "maxPrice", -1 } };
+            JObject fieldFilter = new JObject() { { "maxBuyer", 1 }, { "maxPrice", 1 } };
+            JArray maxPriceObj = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, fieldFilter.ToString(), 1, 1, sortBy.ToString(), filter.ToString());
+            if(maxPriceObj != null && maxPriceObj.Count != 0)
+            {
+                JObject obj = (JObject)maxPriceObj[0];
+                string maxBuyer = obj["maxBuyer"].ToString();
+                string maxPrice = obj["maxPrice"].ToString();
+                string mybidprice = "";
+                if (address == maxBuyer)
+                {
+                    mybidprice = maxPrice;
+                }
+                else
+                {
+                    filter.Add("who", address);
+                    JArray maxPriceSlf = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, fieldFilter.ToString(), filter.ToString());
+                    mybidprice = maxPriceSlf.Sum(p => int.Parse(p["value"].ToString())).ToString();
+                }
+                return new JArray() { { new JObject() { { "domain", domain }, { "maxBuyer", maxBuyer }, { "maxPrice", maxPrice }, { "mybidprice", mybidprice } } } };
+            }
+            return new JArray() { };
+           
+        }
+
         public JArray getBidDetailByDomain(string domain, int pageNum = 1, int pageSize = 10)
         {
             string[] domainArr = domain.Split(".");
