@@ -172,6 +172,15 @@ namespace NEL_Agency_API.Controllers
             {
                 switch (req.method)
                 {
+                    // 最具价值域名
+                    case "aucteddomain":
+                        break;
+                    // 正在竞拍域名
+                    case "auctingdomain":
+                        break;
+                    // statistics(奖金池+已领分红+已使用域名数量+正在竞拍域名数量)
+                    case "statistics":
+                        break;
                     // 资产名称模糊查询
                     case "fuzzysearchasset":
                         result = assetService.fuzzySearchAsset(req.@params[0].ToString());
