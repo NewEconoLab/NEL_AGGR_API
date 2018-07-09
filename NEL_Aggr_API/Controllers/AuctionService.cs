@@ -112,17 +112,17 @@ namespace NEL_Agency_API.Controllers
                     string parenthash = kk.ToString();
                     JToken[] maxPriceArr = gg.OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).ToArray();
                     JToken maxPriceObj = gg.OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).ToArray()[0];
-                    JToken maxPriceSlf = gg.Where(addpriceItem => addpriceItem["displayName"].ToString() == "addprice").OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).ToArray().Where(slfItem => 
-                        Convert.ToString(slfItem["maxBuyer"]) == address
-                        || Convert.ToString(slfItem["maxBuyer"]) == null
-                        || Convert.ToString(slfItem["maxBuyer"]) == ""
-                        || Convert.ToString(slfItem["who"]) == address
-                        ).ToArray()[0];
+                    //JToken maxPriceSlf = gg.Where(addpriceItem => addpriceItem["displayName"].ToString() == "addprice").OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).ToArray().Where(slfItem => 
+                    //    Convert.ToString(slfItem["maxBuyer"]) == address
+                    //    || Convert.ToString(slfItem["maxBuyer"]) == null
+                    //    || Convert.ToString(slfItem["maxBuyer"]) == ""
+                    //    || Convert.ToString(slfItem["who"]) == address
+                    //    ).ToArray()[0];
 
                     JObject obj = new JObject();
 
                     // 0. 我的竞价
-                    obj.Add("mybidprice", String.Format("{0:N8}", Convert.ToString(maxPriceSlf["maxBuyer"]) == address? maxPriceSlf["maxPrice"]: maxPriceSlf["value"]));
+                    //obj.Add("mybidprice", String.Format("{0:N8}", Convert.ToString(maxPriceSlf["maxBuyer"]) == address? maxPriceSlf["maxPrice"]: maxPriceSlf["value"]));
 
                     // 1. 域名
                     string fullDomain = domain + parenthashDict.GetValueOrDefault(parenthash); // 父域名 + 子域名
