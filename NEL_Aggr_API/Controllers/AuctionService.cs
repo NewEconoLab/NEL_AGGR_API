@@ -233,6 +233,7 @@ namespace NEL_Agency_API.Controllers
                 else
                 {
                     filter.Add("who", address);
+                    fieldFilter.Add("value", 1);
                     JArray maxPriceSlf = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, fieldFilter.ToString(), filter.ToString());
                     mybidprice = maxPriceSlf.Sum(p => int.Parse(p["value"].ToString())).ToString();
                 }
