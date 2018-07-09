@@ -112,7 +112,7 @@ namespace NEL_Agency_API.Controllers
                     string parenthash = kk.ToString();
                     JToken[] maxPriceArr = gg.OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).ToArray();
                     JToken maxPriceObj = gg.OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).ToArray()[0];
-                    JToken maxPriceSlf = gg.Where(addpriceItem => addpriceItem["displayName"].ToString() == "addprice").OrderByDescending(maxPriceItem => int.Parse(Convert.ToString(maxPriceItem["maxPrice"]))).ToArray().Where(slfItem => 
+                    JToken maxPriceSlf = gg.Where(addpriceItem => addpriceItem["displayName"].ToString() == "addprice").OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).ToArray().Where(slfItem => 
                         Convert.ToString(slfItem["maxBuyer"]) == address
                         || Convert.ToString(slfItem["maxBuyer"]) == null
                         || Convert.ToString(slfItem["maxBuyer"]) == ""
