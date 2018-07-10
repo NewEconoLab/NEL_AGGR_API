@@ -110,8 +110,8 @@ namespace NEL_Agency_API.Controllers
                 return g.GroupBy(pItem => pItem["parenthash"], (kk, gg) => 
                 {
                     string parenthash = kk.ToString();
-                    JToken[] maxPriceArr = gg.OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).ToArray();
-                    JToken maxPriceObj = gg.OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).ToArray()[0];
+                    //JToken[] maxPriceArr = gg.OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).ToArray();
+                    JToken maxPriceObj = gg.OrderByDescending(maxPriceItem => double.Parse(Convert.ToString(maxPriceItem["maxPrice"]))).ToArray()[0];
                     //JToken maxPriceSlf = gg.Where(addpriceItem => addpriceItem["displayName"].ToString() == "addprice").OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).ToArray().Where(slfItem => 
                     //    Convert.ToString(slfItem["maxBuyer"]) == address
                     //    || Convert.ToString(slfItem["maxBuyer"]) == null
@@ -218,7 +218,7 @@ namespace NEL_Agency_API.Controllers
             filter.Add("parenthash", getNameHash(domainArr[1]));
             filter.Add("displayName", "addprice");
             JObject sortBy = new JObject() { { "maxPrice", -1 } };
-            JObject fieldFilter = new JObject() { { "maxBuyer", 1 }, { "maxPrice", 1 } };
+            JObject fieldFilter = new JObject() { { "maxBuyer", 1 }, { "maxPrice", 1 }, { "startBlockSelling", 1 } };
             JArray maxPriceObj = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, fieldFilter.ToString(), 1, 1, sortBy.ToString(), filter.ToString());
             if(maxPriceObj != null && maxPriceObj.Count != 0)
             {
@@ -237,7 +237,42 @@ namespace NEL_Agency_API.Controllers
                     JArray maxPriceSlf = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, fieldFilter.ToString(), filter.ToString());
                     mybidprice = maxPriceSlf.Sum(p => int.Parse(p["value"].ToString())).ToString();
                 }
-                return new JArray() { { new JObject() { { "domain", domain }, { "maxBuyer", maxBuyer }, { "maxPrice", maxPrice }, { "mybidprice", mybidprice } } } };
+                // 结束标志
+                string auctionState = "";
+                JObject endFilter = new JObject();
+                endFilter.Add("domain", domainArr[0]);
+                endFilter.Add("parenthash", getNameHash(domainArr[1]));
+                endFilter.Add("displayName", "domainstate");
+                endFilter.Add("endBlock", new JObject() { { "$ne", "0"} });
+                JObject endField = new JObject() { { "endBlock", 1 } };
+                JArray endRes = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, endField.ToString(), 1, 1, sortBy.ToString(), endFilter.ToString());
+                if (endRes != null && endRes.Count != 0)
+                {
+                    auctionState = "0"; // 结束标志
+                }
+                else
+                {
+                    string startBlockSellingStr = obj["startBlockSelling"].ToString();
+                    long startBlockSelling = getBlockTimeByIndex(new long[] { long.Parse(startBlockSellingStr) }).GetValueOrDefault(startBlockSellingStr);
+                    long auctionSpentTime = getAuctionSpentTime(startBlockSelling);
+                    if(auctionSpentTime >= FIVE_DAY_SECONDS)
+                    {
+                        // 结束
+                        auctionState = "0";// "Ended";
+                    }
+                    else if(auctionSpentTime > THREE_DAY_SECONDS)
+                    {
+                        // 随机
+                        auctionState = "2";// "Random period";
+                    } 
+                    else
+                    {
+                        // 竞拍中
+                        auctionState = "1";// "Fixed period";
+                    }
+                }
+
+                return new JArray() { { new JObject() { { "domain", domain }, { "maxBuyer", maxBuyer }, { "maxPrice", maxPrice }, { "mybidprice", mybidprice }, { "auctionState", auctionState } } } };
             }
             return new JArray() { };
            
