@@ -904,7 +904,7 @@ namespace NEL_Agency_API.Controllers
                     case "setneodunversion":
                         var key = req.@params[0].ToString();
                         var value = req.@params[1].ToString();
-                        result = getJAbyKV("result", mh.ReplaceOrInsertData(mongodbConnStr, mongodbDatabase, "NeoDunVersion", "{Name:\""+key+"\"}","{Version:\""+value+"\"}"));
+                        result = getJAbyKV("result", mh.ReplaceOrInsertData(mongodbConnStr, mongodbDatabase, "NeoDunVersion", "{Name:\""+key+"\"}","{Name:\""+key+"\",Version:\""+value+"\"}"));
                         break;
                     case "getneodunversion":
                         findFliter = "{}";
