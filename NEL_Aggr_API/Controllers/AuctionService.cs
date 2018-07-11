@@ -193,7 +193,12 @@ namespace NEL_Agency_API.Controllers
                     string domainsub = item["domainsub"].ToString();
                     string parenthash = item["parenthash"].ToString();
                     item.Remove("owner");
-                    item.Add("owner", ownerDict.GetValueOrDefault(domainsub+parenthash));
+                    string owner = "";
+                    if (ownerDict!=null && ownerDict.Count() !=0)
+                    {
+                        ownerDict.GetValueOrDefault(domainsub + parenthash);
+                    }
+                    item.Add("owner", owner == null? "": owner);
 
                     // 竞拍结束，更新已过时间
                     long startAuctionTime = int.Parse(Convert.ToString(item["startAuctionTime"]));
@@ -237,6 +242,7 @@ namespace NEL_Agency_API.Controllers
                     JArray maxPriceSlf = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, fieldFilter.ToString(), filter.ToString());
                     mybidprice = maxPriceSlf.Sum(p => int.Parse(p["value"].ToString())).ToString();
                 }
+                /*
                 // 结束标志
                 string auctionState = "";
                 JObject endFilter = new JObject();
@@ -270,9 +276,10 @@ namespace NEL_Agency_API.Controllers
                         // 竞拍中
                         auctionState = "1";// "Fixed period";
                     }
-                }
+                }*/
 
-                return new JArray() { { new JObject() { { "domain", domain }, { "maxBuyer", maxBuyer }, { "maxPrice", maxPrice }, { "mybidprice", mybidprice }, { "auctionState", auctionState } } } };
+                //return new JArray() { { new JObject() { { "domain", domain }, { "maxBuyer", maxBuyer }, { "maxPrice", maxPrice }, { "mybidprice", mybidprice }, { "auctionState", auctionState } } } };
+                return new JArray() { { new JObject() { { "domain", domain }, { "maxBuyer", maxBuyer }, { "maxPrice", maxPrice }, { "mybidprice", mybidprice } } } };
             }
             return new JArray() { };
            
