@@ -901,6 +901,30 @@ namespace NEL_Agency_API.Controllers
                         var keys = json.Keys;
                         result = new JArray(keys);
                         break;
+                    case "setneodunversion":
+                        var key = req.@params[0].ToString();
+                        var value = req.@params[1].ToString();
+                        result = getJAbyKV("result", mh.ReplaceOrInsertData(mongodbConnStr, mongodbDatabase, "NeoDunVersion", "{Name:\""+key+"\"}","{Version:\""+value+"\"}"));
+                        break;
+                    case "getneodunversion":
+                        findFliter = "{}";
+                        result = mh.GetData(mongodbConnStr, mongodbDatabase, "NeoDunVersion",findFliter);
+                        break;
+                    case "uploadplugin":
+                        var pluginName = req.@params[0].ToString();
+                        var str_plugin = req.@params[1].ToString();
+                        // 上传Oss
+                        pathScript = "";
+                        ossClient.OssFileUpload(System.IO.Path.Combine(pathScript, pluginName + ".bin"), str_plugin);
+                        result = getJAbyKV("result", "suc");
+                        break;
+                    case "downloadplugin":
+                        pluginName = req.@params[0].ToString();
+                        str_plugin = ossClient.OssFileDownLoad(System.IO.Path.Combine("", pluginName + ".bin"));
+                        JO_result = new JObject();
+                        JO_result["plugin"] = str_plugin;
+                        result = new JArray() { JO_result };
+                        break;
                 }
                 if (result.Count == 0)
                 {

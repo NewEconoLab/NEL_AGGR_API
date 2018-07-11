@@ -370,9 +370,7 @@ namespace NEL_Agency_API.lib
             else {
                 totalSysFee = -1;
             }
-
             client = null;
-
             return totalSysFee;
         }
 
@@ -401,10 +399,36 @@ namespace NEL_Agency_API.lib
                 client = null;
                 return e.ToString();
             }
-
-
         }
 
+        public string ReplaceOrInsertData(string mongodbConnStr, string mongodbDatabase, string collName, string whereFliter, string replaceFliter)
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>(collName);
+            try
+            {
+                List<BsonDocument> query = collection.Find(whereFliter).ToList();
+                if (query.Count > 0)
+                {
+                    collection.ReplaceOne(BsonDocument.Parse(whereFliter), BsonDocument.Parse(replaceFliter));
+                    client = null;
+                    return "suc";
+                }
+                else
+                {
+                    BsonDocument bson = BsonDocument.Parse(replaceFliter);
+                    collection.InsertOne(bson);
+                    client = null;
+                    return "suc";
+                }
+            }
+            catch (Exception e)
+            {
+                client = null;
+                return e.ToString();
+            }
+        }
 
         public JArray GetDataAtBlock(string mongodbConnStr, string mongodbDatabase, string coll, string findFliter)
         {
