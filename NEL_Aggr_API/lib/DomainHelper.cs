@@ -23,6 +23,11 @@ namespace NEL_Agency_API.lib
             var domain = sha256.ComputeHash(bs).Concat(roothash).ToArray();
             return new Hash256(sha256.ComputeHash(domain));
         }
+        public static Hash256 nameHashFull(string domain, string parent)
+        {
+            var ps = nameHash(parent);
+            return nameHashSub(ps.data, domain);
+        }
     }
     public class Hash256 : IComparable<Hash256>
     {

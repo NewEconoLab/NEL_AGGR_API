@@ -33,6 +33,7 @@ namespace NEL_Agency_API.Controllers
         private AuctionService auctionService;
         private BonusService bonusService;
         private AssetService assetService;
+        private NNSService nnsService;
 
         httpHelper hh = new httpHelper();
         mongoHelper mh = new mongoHelper();
@@ -88,6 +89,13 @@ namespace NEL_Agency_API.Controllers
                         mh = mh
                     };
                     domainResolver = mh.domainResolver_testnet;
+                    nnsService = new NNSService
+                    {
+                        newNotify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
+                        newNotify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
+                        nnsDomainState = mh.nnsDomainState_testnet,
+                        mh = mh,
+                    };
                     break;
                 case "mainnet":
                     mongodbConnStr = mh.mongodbConnStr_mainnet;
@@ -136,6 +144,13 @@ namespace NEL_Agency_API.Controllers
                         mh = mh
                     };
                     domainResolver = mh.domainResolver_mainnet;
+                    nnsService = new NNSService
+                    {
+                        newNotify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
+                        newNotify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
+                        nnsDomainState = mh.nnsDomainState_mainnet,
+                        mh = mh,
+                    };
                     break;
             }
         }
@@ -172,14 +187,21 @@ namespace NEL_Agency_API.Controllers
             {
                 switch (req.method)
                 {
+                    // 获取域名信息
+                    case "getdomaininfo":
+                        result = nnsService.getDomain(req.@params[0].ToString());
+                        break;
                     // 最具价值域名
-                    case "aucteddomain":
+                    case "getaucteddomain":
+                        result = nnsService.getUsedDomainList();
                         break;
                     // 正在竞拍域名
-                    case "auctingdomain":
+                    case "getauctingdomain":
+                        result = nnsService.getAuctingDomainList();
                         break;
                     // statistics(奖金池+已领分红+已使用域名数量+正在竞拍域名数量)
-                    case "statistics":
+                    case "getstatistics":
+                        result = nnsService.getStatistic();
                         break;
                     // 资产名称模糊查询
                     case "fuzzysearchasset":
