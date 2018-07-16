@@ -196,7 +196,7 @@ namespace NEL_Agency_API.Controllers
                     string owner = "";
                     if (ownerDict!=null && ownerDict.Count() !=0)
                     {
-                        ownerDict.GetValueOrDefault(domainsub + parenthash);
+                        owner = ownerDict.GetValueOrDefault(domainsub + parenthash);
                     }
                     item.Add("owner", owner == null? "": owner);
 
