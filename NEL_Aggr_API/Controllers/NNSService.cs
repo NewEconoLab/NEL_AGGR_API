@@ -26,10 +26,10 @@ namespace NEL_Agency_API.Controllers
 
         public JArray getAuctingDomainList(int pageNum=1, int pageSize=10)
         {
-            // 域名 + 哈希 + 当前最高价 + 竞标人 + 状态
+            // 域名 + 哈希 + 当前最高价 + 竞标人 + 状态  ==> 哈希改为txid
             JObject filter = toOrFilter("auctionState", new string[] { "1", "2" });
             JObject sortBy = new JObject() { { "blockindex", -1 } };
-            JObject fieldFilter = new JObject() { { "fulldomain", 1}, { "fulldomainhash", 1 }, { "maxBuyer", 1 }, { "maxPrice", 1 }, { "auctionState", 1 } };
+            JObject fieldFilter = new JObject() { { "fulldomain", 1}, { "txid", 1 }, { "maxBuyer", 1 }, { "maxPrice", 1 }, { "auctionState", 1 } };
             JArray res = mh.GetDataPagesWithField(newNotify_mongodbConnStr, newNotify_mongodbDatabase, nnsDomainState, fieldFilter.ToString(), pageSize, pageNum, sortBy.ToString(), filter.ToString());
             long count = mh.GetDataCount(newNotify_mongodbConnStr, newNotify_mongodbDatabase, nnsDomainState, filter.ToString());
 
@@ -38,10 +38,10 @@ namespace NEL_Agency_API.Controllers
 
         public JArray getUsedDomainList(int pageNum = 1, int pageSize = 10)
         {
-            // 排名 + 域名 + 哈希 + 成交价 + 中标人 + 域名过期时间
+            // 排名 + 域名 + 哈希 + 成交价 + 中标人 + 域名过期时间 ==> 哈希改为txid
             JObject filter = toOrFilter("auctionState", new string[] { "0","3"});
             JObject sortBy = new JObject() { { "maxPrice", -1 } };
-            JObject fieldFilter = new JObject() { { "fulldomain", 1 }, { "fulldomainhash", 1 }, { "maxBuyer", 1 }, { "maxPrice", 1 }, { "ttl", 1 } };
+            JObject fieldFilter = new JObject() { { "fulldomain", 1 }, { "txid", 1 }, { "maxBuyer", 1 }, { "maxPrice", 1 }, { "ttl", 1 } };
             JArray res = mh.GetDataPagesWithField(newNotify_mongodbConnStr, newNotify_mongodbDatabase, nnsDomainState, fieldFilter.ToString(), pageSize, pageNum, sortBy.ToString(), filter.ToString());
             long count = mh.GetDataCount(newNotify_mongodbConnStr, newNotify_mongodbDatabase, nnsDomainState, filter.ToString());
 
@@ -88,10 +88,11 @@ namespace NEL_Agency_API.Controllers
             string startAuctionTime = obj["startAuctionTime"].ToString();
             string endBlockTime = obj["endBlockTime"].ToString();
             string blockindex = obj["blockindex"].ToString();
+            string txid = obj["txid"].ToString();
             if (auctionState == "0" || auctionState == "3")
             {
                 // 已经成交
-                JObject Jdata = new JObject() { { "domain", fulldomain }, { "hash", fulldomainhash }, { "maxPrice", maxPrice }, { "maxBuyer", maxBuyer }, { "ttl", ttl } };
+                JObject Jdata = new JObject() { { "domain", fulldomain }, { "txid", txid }, { "maxPrice", maxPrice }, { "maxBuyer", maxBuyer }, { "ttl", ttl } };
                 //if(domainInfoFlag)
                 {
                     Jdata.Add("startAuctionTime", startAuctionTime);
@@ -104,7 +105,7 @@ namespace NEL_Agency_API.Controllers
             if (auctionState == "1" || auctionState == "2")
             {
                 // 正在竞拍
-                JObject Jdata = new JObject() { { "domain", fulldomain }, { "hash", fulldomainhash }, { "maxPrice", maxPrice }, { "maxBuyer", maxBuyer }, { "auctionState", auctionState } };
+                JObject Jdata = new JObject() { { "domain", fulldomain }, { "txid", txid }, { "maxPrice", maxPrice }, { "maxBuyer", maxBuyer }, { "auctionState", auctionState } };
                 //if (domainInfoFlag)
                 {
                     Jdata.Add("startAuctionTime", startAuctionTime);
