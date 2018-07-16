@@ -187,17 +187,40 @@ namespace NEL_Agency_API.Controllers
             {
                 switch (req.method)
                 {
+                    // 根据txid查询交易是否成功
+                    case "hastx":
+                        result = auctionService.hasTx(req.@params[0].ToString());
+                        break;
+
+                    // 根据txid查询合约是否成功
+                    case "hascontract":
+                        result = auctionService.hasContract(req.@params[0].ToString());
+                        break;
+
                     // 获取域名信息
                     case "getdomaininfo":
                         result = nnsService.getDomain(req.@params[0].ToString());
                         break;
                     // 最具价值域名
                     case "getaucteddomain":
-                        result = nnsService.getUsedDomainList();
+                        if (req.@params.Length < 2)
+                        {
+                            result = nnsService.getUsedDomainList();
+                        } else
+                        {
+                            result = nnsService.getUsedDomainList(int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
+                        }
                         break;
                     // 正在竞拍域名
                     case "getauctingdomain":
-                        result = nnsService.getAuctingDomainList();
+                        if (req.@params.Length < 2)
+                        {
+                            result = nnsService.getAuctingDomainList();
+                        } else
+                        {
+                            result = nnsService.getAuctingDomainList(int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
+                        }
+                            
                         break;
                     // statistics(奖金池+已领分红+已使用域名数量+正在竞拍域名数量)
                     case "getstatistics":

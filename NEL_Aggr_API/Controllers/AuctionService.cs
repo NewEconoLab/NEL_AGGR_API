@@ -23,6 +23,27 @@ namespace NEL_Agency_API.Controllers
         public string queryBidListCollection { get; set; }
         public AuctionRecharge auctionRecharge { get; set; }
 
+
+        public JArray hasTx(string txid)
+        {
+            bool issucces = queryHasTxFromBlock("tx", new JObject() { { "txid",txid} }.ToString());
+
+            return new JArray() { { new JObject() { { "issucces", issucces } } } };
+        }
+        public JArray hasContract(string txid)
+        {
+            JArray queryRes = queryNotifyFromBlock("notify", new JObject() { { "txid", txid } }.ToString());
+            if(queryRes == null || queryRes.Count == 0)
+            {
+                return new JArray() { new JObject() { { "displayNameList", new JArray() { } } } };
+            }
+            string[] res = queryRes.Where(p => ((JArray)p["notifications"]).Count() != 0).SelectMany(p =>
+            {
+                JArray pArr = (JArray)p["notifications"];
+                return pArr.Select(pp => pp["state"]["value"][0]["value"].ToString()).Select(pp => pp.Hexstring2String()).ToArray();
+            }).ToArray();
+            return new JArray() { new JObject() {{ "displayNameList", new JArray() { res } } } };
+        }
         public JArray rechargeAndTransfer(string txhex1, string txhex2)
         {
             return auctionRecharge.rechargeAndTransfer(txhex1, txhex2);
@@ -506,6 +527,14 @@ namespace NEL_Agency_API.Controllers
         }
 
         private JArray queryBlock(string coll, string filter)
+        {
+            return mh.GetData(Block_mongodbConnStr, Block_mongodbDatabase, coll, filter);
+        }
+        private bool queryHasTxFromBlock(string coll, string filter)
+        {
+            return mh.GetDataCount(Block_mongodbConnStr, Block_mongodbDatabase, coll, filter) >= 1 ;
+        }
+        private JArray queryNotifyFromBlock(string coll, string filter)
         {
             return mh.GetData(Block_mongodbConnStr, Block_mongodbDatabase, coll, filter);
         }
