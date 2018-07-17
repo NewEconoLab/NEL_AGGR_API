@@ -191,7 +191,6 @@ namespace NEL_Agency_API.Controllers
                     case "hastx":
                         result = auctionService.hasTx(req.@params[0].ToString());
                         break;
-
                     // 根据txid查询合约是否成功
                     case "hascontract":
                         result = auctionService.hasContract(req.@params[0].ToString());
