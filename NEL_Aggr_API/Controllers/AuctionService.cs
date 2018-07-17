@@ -334,7 +334,11 @@ namespace NEL_Agency_API.Controllers
                     maxPrice = Convert.ToString(queryRes.Where(pItem => pItem["who"].ToString() == who && int.Parse(pItem["blockindex"].ToString()) <= int.Parse(item["blockindex"].ToString())).Sum(ppItem => double.Parse(ppItem["value"].ToString())));
                 }
                 long addPriceTime = blocktimeDict.GetValueOrDefault(Convert.ToString(item["blockindex"]));
-                return new JObject() { { "maxPrice", maxPrice }, { "maxBuyer", maxBuyer }, { "addPriceTime", addPriceTime } };
+                // 新增txid +出价人 +当笔出价金额
+                string txid = item["txid"].ToString();
+                string bidder = item["who"].ToString();
+                double raisebid = double.Parse(item["value"].ToString());
+                return new JObject() { { "maxPrice", maxPrice }, { "maxBuyer", maxBuyer }, { "addPriceTime", addPriceTime }, { "txid", txid }, { "bidder", bidder }, { "raisebid", raisebid } };
 
             }).Where(p => Convert.ToString(p["maxPrice"]) != "0").OrderByDescending(p => p["addPriceTime"]).ThenByDescending(p => double.Parse(p["maxPrice"].ToString())).Skip(pageSize*(pageNum-1)).Take(pageSize).ToArray();
             long count = queryRes.Count;
