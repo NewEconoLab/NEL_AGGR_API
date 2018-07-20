@@ -382,8 +382,11 @@ namespace NEL_Agency_API.Controllers
             // 批量查询blockindex对应的时间
             long[] blockindexArr = queryRes.Select(item => long.Parse(item["blockindex"].ToString())).ToArray();
             Dictionary<string, long> blocktimeDict = getBlockTimeByIndex(blockindexArr);
-            //
-            JObject[] arr = queryRes.Select(item =>
+            // 最近一次开拍时间开始之后的竞拍记录
+            long lastStartBlockSelling = queryRes.Where(p => p["maxPrice"].ToString() == "0").Select(p => long.Parse(p["blockindex"].ToString())).OrderByDescending(p => p).ToArray()[0];
+            JToken[] queryArr = queryRes.Where(p => long.Parse(p["blockindex"].ToString()) >= lastStartBlockSelling).ToArray();
+            // 分页
+            JObject[] arr = queryArr.Select(item =>
             {
                 string maxPrice = item["maxPrice"].ToString();
                 string maxBuyer = item["maxBuyer"].ToString();
@@ -391,7 +394,7 @@ namespace NEL_Agency_API.Controllers
                 if (maxBuyer != who)
                 {
                     maxBuyer = who;
-                    maxPrice = Convert.ToString(queryRes.Where(pItem => pItem["who"].ToString() == who && int.Parse(pItem["blockindex"].ToString()) <= int.Parse(item["blockindex"].ToString())).Sum(ppItem => double.Parse(ppItem["value"].ToString())));
+                    maxPrice = Convert.ToString(queryArr.Where(pItem => pItem["who"].ToString() == who && int.Parse(pItem["blockindex"].ToString()) <= int.Parse(item["blockindex"].ToString())).Sum(ppItem => double.Parse(ppItem["value"].ToString())));
                 }
                 long addPriceTime = blocktimeDict.GetValueOrDefault(Convert.ToString(item["blockindex"]));
                 // 新增txid +出价人 +当笔出价金额
@@ -401,7 +404,9 @@ namespace NEL_Agency_API.Controllers
                 return new JObject() { { "maxPrice", maxPrice }, { "maxBuyer", maxBuyer }, { "addPriceTime", addPriceTime }, { "txid", txid }, { "bidder", bidder }, { "raisebid", raisebid } };
 
             }).Where(p => Convert.ToString(p["maxPrice"]) != "0").OrderByDescending(p => p["addPriceTime"]).ThenByDescending(p => double.Parse(p["maxPrice"].ToString())).Skip(pageSize * (pageNum - 1)).Take(pageSize).ToArray();
-            long count = queryRes.Count;
+            // 总量
+            long count = queryArr.Where(p => p["maxPrice"].ToString() != "0").ToArray().Count();
+            // 返回
             JObject res = new JObject();
             res.Add("list", new JArray() { arr });
             res.Add("count", count);
