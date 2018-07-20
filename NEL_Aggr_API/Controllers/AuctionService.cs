@@ -149,16 +149,7 @@ namespace NEL_Agency_API.Controllers
                         }
                         return false;
                     }).ToArray();
-                    bool noAnyAddPriceFlagExpire = expireDomainArr.All(p =>
-                    {
-                        long startBlockTime = blockindexDict.GetValueOrDefault(p["startBlockSelling"].ToString());
-                        long startBlockSpentTime = getAuctionSpentTime(startBlockTime);
-                        if (startBlockSpentTime > THREE_DAY_SECONDS && p["maxPrice"].ToString() == "0")
-                        {
-                            return true;
-                        }
-                        return false;
-                    });
+                   
 
                     // 未过期竞拍列表
                     JToken[] noExpireDomainArr = gg.Where(p =>
@@ -172,8 +163,19 @@ namespace NEL_Agency_API.Controllers
                         return false;
                     }).ToArray();
 
-                    // 流拍域名列表
-                    bool noAnyAddPriceFlag = noExpireDomainArr.All(p =>
+
+                    // 待处理竞拍
+                    JToken[] normalDomainArr = noExpireDomainArr;
+                    if (normalDomainArr == null || normalDomainArr.Count() == 0)
+                    {
+                        //normalDomainArr = expireDomainArr;
+                        // 筛选出最近一批竞拍记录
+                        long lastStartBlockSelling = long.Parse(expireDomainArr.Where(p => p["maxPrice"].ToString() == "0").OrderByDescending(p => long.Parse(p["blockindex"].ToString())).Select(p=>p["blockindex"].ToString()).ToArray()[0]);
+                        normalDomainArr = expireDomainArr.Where(p => long.Parse(p["blockindex"].ToString()) >= lastStartBlockSelling).ToArray();
+                    }
+
+                    // 待处理竞拍是否流拍
+                    bool noAnyAddPriceFlag = normalDomainArr.All(p =>
                     {
                         long startBlockTime = blockindexDict.GetValueOrDefault(p["startBlockSelling"].ToString());
                         long startBlockSpentTime = getAuctionSpentTime(startBlockTime);
@@ -184,17 +186,10 @@ namespace NEL_Agency_API.Controllers
                         return false;
                     });
 
-
-
-                    // 正常域名列表
-                    JToken[] normalDomainArr = noExpireDomainArr;
+                    // 流拍竞拍
                     if (noAnyAddPriceFlag)
                     {
-                        if (noAnyAddPriceFlagExpire)
-                        {
-                            return new JObject { { "auctionState", noAnyAddPriceState } };
-                        }
-                        normalDomainArr = expireDomainArr;
+                        return new JObject { { "auctionState", noAnyAddPriceState } };
                     }
 
                     //JToken[] maxPriceArr = gg.OrderByDescending(maxPriceItem => Convert.ToString(maxPriceItem["maxPrice"])).ToArray();

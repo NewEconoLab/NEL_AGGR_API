@@ -45,7 +45,7 @@ namespace NEL_Agency_API.Controllers
             JArray res = mh.GetDataPagesWithField(newNotify_mongodbConnStr, newNotify_mongodbDatabase, nnsDomainState, fieldFilter.ToString(), pageSize, pageNum, sortBy.ToString(), filter.ToString());
             long count = mh.GetDataCount(newNotify_mongodbConnStr, newNotify_mongodbDatabase, nnsDomainState, filter.ToString());
 
-            int num = 0;
+            int num = (pageNum-1)*pageSize;
             foreach(JObject obj in res)
             {
                 obj.Add("range", ++num);
