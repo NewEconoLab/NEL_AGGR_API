@@ -551,7 +551,8 @@ namespace NEL_Agency_API.Controllers
                         // 超过三天无任何人出价则流拍
                         auctionState = noAnyAddPriceState;
                     }
-                    else if (lastAddPriceAuctionSpentTime > TWO_DAY_SECONDS && lastAddPriceAuctionSpentTime < THREE_DAY_SECONDS)
+                    //else if (lastAddPriceAuctionSpentTime > TWO_DAY_SECONDS && lastAddPriceAuctionSpentTime < THREE_DAY_SECONDS)
+                    else if (lastAddPriceAuctionSpentTime <= TWO_DAY_SECONDS)
                     {
                         // 超过三天且第三天无出价则结束
                         auctionState = "0";
