@@ -326,43 +326,6 @@ namespace NEL_Agency_API.Controllers
                     JArray maxPriceSlf = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, fieldFilter.ToString(), filter.ToString());
                     mybidprice = maxPriceSlf.Sum(p => double.Parse(p["value"].ToString())).ToString();
                 }
-                /*
-                // 结束标志
-                string auctionState = "";
-                JObject endFilter = new JObject();
-                endFilter.Add("domain", domainArr[0]);
-                endFilter.Add("parenthash", getNameHash(domainArr[1]));
-                endFilter.Add("displayName", "domainstate");
-                endFilter.Add("endBlock", new JObject() { { "$ne", "0"} });
-                JObject endField = new JObject() { { "endBlock", 1 } };
-                JArray endRes = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, endField.ToString(), 1, 1, sortBy.ToString(), endFilter.ToString());
-                if (endRes != null && endRes.Count != 0)
-                {
-                    auctionState = "0"; // 结束标志
-                }
-                else
-                {
-                    string startBlockSellingStr = obj["startBlockSelling"].ToString();
-                    long startBlockSelling = getBlockTimeByIndex(new long[] { long.Parse(startBlockSellingStr) }).GetValueOrDefault(startBlockSellingStr);
-                    long auctionSpentTime = getAuctionSpentTime(startBlockSelling);
-                    if(auctionSpentTime >= FIVE_DAY_SECONDS)
-                    {
-                        // 结束
-                        auctionState = "0";// "Ended";
-                    }
-                    else if(auctionSpentTime > THREE_DAY_SECONDS)
-                    {
-                        // 随机
-                        auctionState = "2";// "Random period";
-                    } 
-                    else
-                    {
-                        // 竞拍中
-                        auctionState = "1";// "Fixed period";
-                    }
-                }*/
-
-                //return new JArray() { { new JObject() { { "domain", domain }, { "maxBuyer", maxBuyer }, { "maxPrice", maxPrice }, { "mybidprice", mybidprice }, { "auctionState", auctionState } } } };
                 return new JArray() { { new JObject() { { "id", auctionid }, { "maxBuyer", maxBuyer }, { "maxPrice", maxPrice }, { "mybidprice", mybidprice } } } };
             }
             return new JArray() { };
@@ -554,8 +517,7 @@ namespace NEL_Agency_API.Controllers
                         // 超过三天无任何人出价则流拍
                         auctionState = noAnyAddPriceState;
                     }
-                    //else if (lastAddPriceAuctionSpentTime > TWO_DAY_SECONDS && lastAddPriceAuctionSpentTime < THREE_DAY_SECONDS)
-                    else if (lastAddPriceAuctionSpentTime <= TWO_DAY_SECONDS)
+                    else if (auctionSpentTime - lastAddPriceAuctionSpentTime <= TWO_DAY_SECONDS)
                     {
                         // 超过三天且第三天无出价则结束
                         auctionState = "0";
