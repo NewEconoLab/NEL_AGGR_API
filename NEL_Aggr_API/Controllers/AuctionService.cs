@@ -173,7 +173,21 @@ namespace NEL_Agency_API.Controllers
                     }
                     // 筛选出最近一批竞拍记录
                     long lastStartBlockSelling = long.Parse(normalDomainArr.Where(p => p["maxPrice"].ToString() == "0").OrderByDescending(p => long.Parse(p["blockindex"].ToString())).Select(p => p["blockindex"].ToString()).ToArray()[0]);
-                    normalDomainArr = normalDomainArr.Where(p => long.Parse(p["blockindex"].ToString()) >= lastStartBlockSelling).ToArray();
+                    //normalDomainArr = normalDomainArr.Where(p => long.Parse(p["blockindex"].ToString()) >= lastStartBlockSelling).ToArray();
+                    normalDomainArr = normalDomainArr.Where(p => {
+                        long blockindex = long.Parse(p["blockindex"].ToString());
+                        long endBlock = long.Parse(p["endBlock"].ToString());
+                        if(blockindex == lastStartBlockSelling && endBlock == 0)
+                        {
+                            return true;
+                        }
+                        if (blockindex > lastStartBlockSelling)
+                        {
+                            return true;
+                        }
+                        return false;
+                    }
+                    ).ToArray();
 
                     // 待处理竞拍是否流拍
                     bool noAnyAddPriceFlag = normalDomainArr.All(p =>
