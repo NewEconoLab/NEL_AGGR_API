@@ -169,11 +169,11 @@ namespace NEL_Agency_API.Controllers
                     JToken[] normalDomainArr = noExpireDomainArr;
                     if (normalDomainArr == null || normalDomainArr.Count() == 0)
                     {
-                        //normalDomainArr = expireDomainArr;
-                        // 筛选出最近一批竞拍记录
-                        long lastStartBlockSelling = long.Parse(expireDomainArr.Where(p => p["maxPrice"].ToString() == "0").OrderByDescending(p => long.Parse(p["blockindex"].ToString())).Select(p=>p["blockindex"].ToString()).ToArray()[0]);
-                        normalDomainArr = expireDomainArr.Where(p => long.Parse(p["blockindex"].ToString()) >= lastStartBlockSelling).ToArray();
+                        normalDomainArr = expireDomainArr;
                     }
+                    // 筛选出最近一批竞拍记录
+                    long lastStartBlockSelling = long.Parse(normalDomainArr.Where(p => p["maxPrice"].ToString() == "0").OrderByDescending(p => long.Parse(p["blockindex"].ToString())).Select(p => p["blockindex"].ToString()).ToArray()[0]);
+                    normalDomainArr = normalDomainArr.Where(p => long.Parse(p["blockindex"].ToString()) >= lastStartBlockSelling).ToArray();
 
                     // 待处理竞拍是否流拍
                     bool noAnyAddPriceFlag = normalDomainArr.All(p =>
@@ -228,7 +228,7 @@ namespace NEL_Agency_API.Controllers
                     string maxBuyer = Convert.ToString(maxPriceObj["maxBuyer"]);
                     string maxPrice = Convert.ToString(maxPriceObj["maxPrice"]);
                     bool hasOnlyBidOpen = (maxBuyer == "" && maxPrice == "0");
-                    List<JToken> endBlockToken = gg.Where(pp => {
+                    List<JToken> endBlockToken = normalDomainArr.Where(pp => {
                         return Convert.ToString(pp["maxPrice"]) == maxPrice
                         && Convert.ToString(pp["displayName"]) == "domainstate"
                         && Convert.ToString(pp["endBlock"]) != "0";
