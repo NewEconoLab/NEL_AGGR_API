@@ -72,7 +72,7 @@ namespace NEL_Agency_API.Controllers
         public JArray getBidListByAddress(string address, int pageNum = 0, int pageSize = 0)
         {
             int count;
-            JObject[] res = queryDomainList(address, pageNum, pageSize, out count);
+            JObject[] res = queryDomainList(address, pageNum, pageSize, out count, "", true);
             if (res == null || res.Length == 0)
             {
                 return new JArray() { };
@@ -85,7 +85,7 @@ namespace NEL_Agency_API.Controllers
 
             return new JArray() { rr };
         }
-        private JObject[] queryDomainList(string address, int pageNum, int pageSize, out int count, string prefixDomain = "")
+        private JObject[] queryDomainList(string address, int pageNum, int pageSize, out int count, string prefixDomain = "", bool isNeo2=false)
         {
             // 参拍域名
             JObject filter = new JObject() { { "who", address }, { "displayName", "addprice" } };
@@ -94,7 +94,7 @@ namespace NEL_Agency_API.Controllers
                 filter.Add("domain", new JObject() { { "$regex", prefixDomain }, { "$options", "i" } });
             }
             JObject fieldFilter = toReturn(new string[] { "domain", "parenthash", "blockindex" });
-            JArray queryRes = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, fieldFilter.ToString(), filter.ToString());
+            JArray queryRes = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, isNeo2 ? "0x2788ee1116e47f4a35432d2b6650e48a3d632b97" : queryBidListCollection, fieldFilter.ToString(), filter.ToString());
             if (queryRes == null || queryRes.Count() == 0)
             {
                 count = 0;
