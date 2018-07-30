@@ -119,7 +119,7 @@ namespace NEL_Agency_API.Controllers
 
             // 域名终值
             JObject multiFilter = new JObject() { { "$or", new JArray() { rr.Select(item => { ((JObject)item).Remove("blockindex"); return item; }).ToArray() } } };
-            JArray multiRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, multiFilter.ToString());
+            JArray multiRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, isNeo2 ? "0x2788ee1116e47f4a35432d2b6650e48a3d632b97" : queryBidListCollection, multiFilter.ToString());
 
             // 所有parenthash
             string[] parenthashArr = multiRes.Select(item => item["parenthash"].ToString()).Distinct().ToArray();
