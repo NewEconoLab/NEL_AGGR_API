@@ -2,10 +2,7 @@
 using NEL_Agency_API.RPC;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using MongoDB.Bson;
 using System.Security.Cryptography;
 
@@ -30,10 +27,6 @@ namespace NEL_Agency_API.Controllers
         
 
         private OssFileService ossClient;
-        private AuctionService auctionService;
-        private BonusService bonusService;
-        private AssetService assetService;
-        private NNSService nnsService;
 
         httpHelper hh = new httpHelper();
         mongoHelper mh = new mongoHelper();
@@ -51,51 +44,7 @@ namespace NEL_Agency_API.Controllers
                     mongodbConnStrAtBlock = mh.mongodbConnStrAtBlock_testnet;
                     mongodbDatabaseAtBlock = mh.mongodbDatabaseAtBlock_testnet;
                     ossClient = new OssFileService(mh.ossServiceUrl_testnet);
-                    AuctionRecharge auctionRechargetTestNet = new AuctionRecharge()
-                    {
-                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
-                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
-                        mh = mh,
-                        nelJsonRPCUrl = mh.nelJsonRPCUrl_testnet,
-                        rechargeCollection = mh.rechargeCollection_testnet
-                    };
-                    auctionService = new AuctionService()
-                    {
-                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
-                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
-                        mh = mh,
-                        Block_mongodbConnStr = mh.mongodbConnStrAtBlock_testnet,
-                        Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_testnet,
-                        queryDomainCollection = mh.queryDomainCollection_testnet,
-                        queryBidListCollection = mh.queryBidListCollection_testnet,
-                        auctionRecharge = auctionRechargetTestNet
-                    };
                     queryDomainCollection = mh.queryDomainCollection_testnet;
-                    queryTxidSetCollection = mh.queryTxidSetCollection_testnet;
-                    bonusService = new BonusService
-                    {
-                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
-                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
-                        mh = mh,
-                        BonusNofityCol = mh.bonusNotifyCol_testnet,
-                        BonusNofityFrom = mh.bonusNotifyFrom_testnet,
-                        Block_mongodbConnStr = mh.mongodbConnStrAtBlock_testnet,
-                        Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_testnet
-                    };
-                    assetService = new AssetService
-                    {
-                        mongodbConnStr = mh.mongodbConnStrAtBlock_testnet,
-                        mongodbDatabase = mh.mongodbDatabaseAtBlock_testnet,
-                        mh = mh
-                    };
-                    domainResolver = mh.domainResolver_testnet;
-                    nnsService = new NNSService
-                    {
-                        newNotify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
-                        newNotify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
-                        nnsDomainState = mh.nnsDomainState_testnet,
-                        mh = mh,
-                    };
                     break;
                 case "mainnet":
                     mongodbConnStr = mh.mongodbConnStr_mainnet;
@@ -106,51 +55,7 @@ namespace NEL_Agency_API.Controllers
                     mongodbConnStrAtBlock = mh.mongodbConnStrAtBlock_mainnet;
                     mongodbDatabaseAtBlock = mh.mongodbDatabaseAtBlock_mainnet;
                     ossClient = new OssFileService(mh.ossServiceUrl_mainnet);
-                    AuctionRecharge auctionRechargetMainNet = new AuctionRecharge()
-                    {
-                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
-                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
-                        mh = mh,
-                        nelJsonRPCUrl = mh.nelJsonRPCUrl_mainnet,
-                        rechargeCollection = mh.rechargeCollection_mainnet
-                    };
-                    auctionService = new AuctionService()
-                    {
-                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
-                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
-                        mh = mh,
-                        Block_mongodbConnStr = mh.mongodbConnStrAtBlock_mainnet,
-                        Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_mainnet,
-                        queryDomainCollection = mh.queryDomainCollection_mainnet,
-                        queryBidListCollection = mh.queryBidListCollection_mainnet,
-                        auctionRecharge = auctionRechargetMainNet
-                    };
                     queryDomainCollection = mh.queryDomainCollection_mainnet;
-                    queryTxidSetCollection = mh.queryTxidSetCollection_mainnet;
-                    bonusService = new BonusService
-                    {
-                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
-                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
-                        mh = mh,
-                        BonusNofityCol = mh.bonusNotifyCol_mainnet,
-                        BonusNofityFrom = mh.bonusNotifyFrom_mainnet,
-                        Block_mongodbConnStr = mh.mongodbConnStrAtBlock_mainnet,
-                        Block_mongodbDatabase = mh.mongodbDatabaseAtBlock_mainnet
-                    };
-                    assetService = new AssetService
-                    {
-                        mongodbConnStr = mh.mongodbConnStrAtBlock_mainnet,
-                        mongodbDatabase = mh.mongodbDatabaseAtBlock_mainnet,
-                        mh = mh
-                    };
-                    domainResolver = mh.domainResolver_mainnet;
-                    nnsService = new NNSService
-                    {
-                        newNotify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
-                        newNotify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
-                        nnsDomainState = mh.nnsDomainState_mainnet,
-                        mh = mh,
-                    };
                     break;
             }
         }
@@ -187,181 +92,6 @@ namespace NEL_Agency_API.Controllers
             {
                 switch (req.method)
                 {
-                    // 根据txid查询交易是否成功
-                    case "hastx":
-                        result = auctionService.hasTx(req.@params[0].ToString());
-                        break;
-                    // 根据txid查询合约是否成功
-                    case "hascontract":
-                        result = auctionService.hasContract(req.@params[0].ToString());
-                        break;
-
-                    // 获取域名信息
-                    case "getdomaininfo":
-                        result = nnsService.getDomain(req.@params[0].ToString());
-                        break;
-                    // 最具价值域名
-                    case "getaucteddomain":
-                        if (req.@params.Length < 2)
-                        {
-                            result = nnsService.getUsedDomainList();
-                        } else
-                        {
-                            result = nnsService.getUsedDomainList(int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
-                        }
-                        break;
-                    // 正在竞拍域名
-                    case "getauctingdomain":
-                        if (req.@params.Length < 2)
-                        {
-                            result = nnsService.getAuctingDomainList();
-                        } else
-                        {
-                            result = nnsService.getAuctingDomainList(int.Parse(req.@params[0].ToString()), int.Parse(req.@params[1].ToString()));
-                        }
-                            
-                        break;
-                    // statistics(奖金池+已领分红+已使用域名数量+正在竞拍域名数量)
-                    case "getstatistics":
-                        result = nnsService.getStatistic();
-                        break;
-                    // 资产名称模糊查询
-                    case "fuzzysearchasset":
-                        result = assetService.fuzzySearchAsset(req.@params[0].ToString());
-                        break;
-                    // 充值&转账
-                    case "rechargeandtransfer":
-                        result = auctionService.rechargeAndTransfer(req.@params[0].ToString(), req.@params[1].ToString());
-                        break;
-                    // 查询充值&转账交易
-                    case "getrechargeandtransfer":
-                        result = auctionService.getRechargeAndTransfer(req.@params[0].ToString());
-                        break;
-                    // 根据地址查询分红历史
-                    case "getbonushistbyaddress":
-                        if(req.@params.Length < 3)
-                        {
-                            result = bonusService.getBonusHistByAddress(req.@params[0].ToString());
-                        } else
-                        {
-                            result = bonusService.getBonusHistByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
-                        }
-                        break;
-                    // 根据地址查询竞拍域名列表(域名支持模糊匹配)
-                    case "searchdomainbyaddress":
-                        if (req.@params.Length < 3)
-                        {
-                            result = auctionService.getBidListByAddressLikeDomain(req.@params[0].ToString(), req.@params[1].ToString());
-                        } else
-                        {
-                            result = auctionService.getBidListByAddressLikeDomain(req.@params[0].ToString(), req.@params[1].ToString(), int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()));
-                        }
-                        break;
-                    case "getdomainstate":
-                        result = auctionService.getDomainInfoByAddress(req.@params[0].ToString(), req.@params[1].ToString());
-                        break;
-                    // 根据地址查询竞拍域名列表
-                    case "getbidlistbyaddress":
-                        if(req.@params.Length < 3)
-                        {
-                            result = auctionService.getBidListByAddress(req.@params[0].ToString());
-                        } else
-                        {
-                            result = auctionService.getBidListByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
-                        }
-                        break;
-                    // 根据域名查询域名竞拍详情
-                    case "getbiddetailbydomain":
-                        if (req.@params.Length < 3)
-                        {   // 返回全部
-                            result = auctionService.getBidDetailByDomain(req.@params[0].ToString());
-                        } else
-                        {   // 分页返回
-                            result = auctionService.getBidDetailByDomain(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
-                        }
-                        break;
-                    // 根据域名查询域名竞拍结果
-                    case "getbidresbydomain":
-                        result = auctionService.getBidResByDomain(req.@params[0].ToString());
-                        break;
-                        
-                    // 根据地址查询域名
-                    case "getdomainbyaddress":
-                        JObject queryFilter = new JObject();
-                        queryFilter.Add("owner", req.@params[0].ToString());
-                        string queryFilterRoot = ".test";
-                        if (req.@params.Length > 1)
-                        {
-                            queryFilterRoot = req.@params[1].ToString();
-                        }
-                        string parenthash = DomainHelper.nameHash(queryFilterRoot.Substring(1)).ToString();
-                        if (queryFilterRoot != ".all")
-                        {
-                            queryFilter.Add("parenthash", parenthash);
-                        }
-                        JArray queryRes = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, queryDomainCollection, queryFilter.ToString());
-                        //JObject[] rs = queryRes.Select(item => {
-                        result = new JArray(){ queryRes.Select(item => {
-                            // 全域名
-                            string fullDomain = null;   // 域名
-                            string resolver = null;     // 解析器Hex
-                            string resolverAddr = null;     // 解析器地址
-                            string ttl = null;      // 到期时间
-
-                            // 本域名
-                            string slfDomain = Convert.ToString(item["domain"]);
-                            fullDomain += slfDomain;
-
-                            // 父域名
-                            string parentDomain = queryFilterRoot;
-                            fullDomain += parentDomain;
-
-                            // 解析器、解析地址、过期时间
-                            resolver = Convert.ToString(item["resolver"]);
-                            resolverAddr = "";
-                            {
-                                var test = DomainHelper.nameHash(parentDomain.Substring(1));
-                                var a_test = DomainHelper.nameHashSub(test, slfDomain);
-                                // 获取解析器映射地址
-                                JObject resolverFilter = new JObject();
-                                resolverFilter.Add("namehash", a_test.ToString());
-                                resolverFilter.Add("protocol", "addr");
-                                JObject resolverSort = new JObject();
-                                resolverSort.Add("blockindex", -1);
-                                JArray resolverRes = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, domainResolver, resolverFilter.ToString());
-                                //JArray resolverRes = mh.GetDataPages(mongodbConnStr, mongodbDatabase, domainResolver, resolverSort.ToString(), 1, 1, resolverFilter.ToString());
-                                if (resolverRes != null && resolverRes.Count >= 1)
-                                {
-                                    JToken last = resolverRes.OrderByDescending(ppp => Convert.ToString(ppp["getTime"])).First();
-                                    resolverAddr = Convert.ToString(last["data"]);
-                                }
-                            }
-                            ttl = Convert.ToString(item["TTL"]);
-                            string getTime = Convert.ToString(item["getTime"]);
-                            return new JObject { { "domain", fullDomain }, { "resolver", resolver }, { "resolverAddress", resolverAddr }, { "ttl", ttl }
-                                , { "gettime", getTime }, { "slfDomain", slfDomain} };
-
-                        }).GroupBy(ii => ii["domain"], (kkk, ggg) => {
-                            return ggg.OrderByDescending(iii => iii["gettime"]).ToArray().First();
-                        }).Where(pItem => {
-                            // filter: 过滤掉过期的且被他人再次使用的
-                            string slfDomain = Convert.ToString(pItem["slfDomain"]);
-                            long expire = long.Parse(Convert.ToString(pItem["ttl"]));
-                            long nowtime = TimeHelper.GetTimeStamp();
-                            if (expire != 0 && expire < nowtime)
-                            {
-                                string filter = "{$and: [{\"domain\":\"" + slfDomain + "\"}" + "," + "{\"parenthash\":\"" + parenthash + "\"}" + "," + "{\"owner\":\"" + "{$not:" + req.@params[0] + "}" + "\"}" + "]}";
-                                JArray queryDomainResFilter = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, queryDomainCollection, filter);
-                                if (queryDomainResFilter != null && queryDomainResFilter.Count() > 0) return false;
-                            }
-                            return true;
-                        }).Select(ppItem => {
-                            ppItem.Remove("gettime");
-                            ppItem.Remove("slfDomain");
-                            return ppItem;
-                        }).ToArray() };
-                        break;
-
                     // 根据地址查询txid列表
                     case "gettxidsetbyaddress":
                         string queryTxidSetAddr = "{$or: [{\"from\":\"" + req.@params[0] + "\"}" + "," + "{\"to\":\"" + req.@params[0] + "\"}]}";

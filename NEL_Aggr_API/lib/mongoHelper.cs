@@ -27,16 +27,7 @@ namespace NEL_Agency_API.lib
 
         public string mongodbConnStr_NeonOnline = string.Empty;
         public string mongodbDatabase_NeonOnline = string.Empty;
-
-       
-        public string queryDomainCollection_testnet = string.Empty;
-        public string queryTxidSetCollection_testnet = string.Empty; 
-        public string queryBidListCollection_testnet = string.Empty; 
-
-        public string queryDomainCollection_mainnet = string.Empty;
-        public string queryTxidSetCollection_mainnet = string.Empty;
-        public string queryBidListCollection_mainnet = string.Empty;
-
+        
         public string mongodbConnStrAtBlock_mainnet = string.Empty;
         public string mongodbDatabaseAtBlock_mainnet = string.Empty;
         public string mongodbConnStrAtBlock_testnet = string.Empty;
@@ -44,22 +35,9 @@ namespace NEL_Agency_API.lib
 
         public string ossServiceUrl_testnet = string.Empty;
         public string ossServiceUrl_mainnet = string.Empty;
+        public string queryDomainCollection_testnet = string.Empty;
+        public string queryDomainCollection_mainnet = string.Empty;
         
-        public string bonusNotifyCol_testnet = string.Empty;
-        public string bonusNotifyFrom_testnet = string.Empty;
-        public string bonusNotifyCol_mainnet = string.Empty;
-        public string bonusNotifyFrom_mainnet = string.Empty;
-
-        public string rechargeCollection_mainnet = string.Empty;
-        public string rechargeCollection_testnet = string.Empty;
-
-        public string domainResolver_testnet = string.Empty;
-        public string domainResolver_mainnet = string.Empty;
-
-        public string nnsDomainState_testnet = string.Empty;
-        public string nnsDomainState_mainnet = string.Empty;
-
-
         public mongoHelper() {
             var config = new ConfigurationBuilder()
                 .AddInMemoryCollection()    //将配置文件的数据加载到内存中
@@ -80,16 +58,10 @@ namespace NEL_Agency_API.lib
 
             mongodbConnStr_NeonOnline = config["mongodbConnStr_NeonOnline"];
             mongodbDatabase_NeonOnline = config["mongodbDatabase_NeonOnline"];
-
-
+            
             queryDomainCollection_testnet = config["queryDomainCollection_testnet"];
-            queryTxidSetCollection_testnet = config["queryTxidSetCollection_testnet"];
-            queryBidListCollection_testnet = config["queryBidListCollection_testnet"];
             queryDomainCollection_mainnet = config["queryDomainCollection_mainnet"];
-            queryTxidSetCollection_mainnet = config["queryTxidSetCollection_mainnet"];
-            queryBidListCollection_mainnet = config["queryBidListCollection_mainnet"];
-
-
+            
             mongodbConnStrAtBlock_mainnet = config["mongodbConnStrAtBlock_mainnet"];
             mongodbDatabaseAtBlock_mainnet = config["mongodbDatabaseAtBlock_mainnet"];
             mongodbConnStrAtBlock_testnet = config["mongodbConnStrAtBlock_testnet"];
@@ -97,20 +69,7 @@ namespace NEL_Agency_API.lib
 
             ossServiceUrl_testnet = config["ossServiceUrl_testnet"];
             ossServiceUrl_mainnet = config["ossServiceUrl_mainnet"];
-
-            bonusNotifyCol_testnet = config["bonusNotifyCol_testnet"];
-            bonusNotifyFrom_testnet = config["bonusNotifyFrom_testnet"];
-            bonusNotifyCol_mainnet = config["bonusNotifyCol_mainnet"];
-            bonusNotifyFrom_mainnet = config["bonusNotifyFrom_mainnet"];
-
-            rechargeCollection_mainnet = config["rechargeCollection_mainnet"];
-            rechargeCollection_testnet = config["rechargeCollection_testnet"];
-
-            domainResolver_testnet = config["domainResolver_testnet"];
-            domainResolver_mainnet = config["domainResolver_mainnet"];
-
-            nnsDomainState_testnet = config["nnsDomainState_testnet"];
-            nnsDomainState_mainnet = config["nnsDomainState_mainnet"];
+            
         }
 
         public JArray GetData(string mongodbConnStr,string mongodbDatabase, string coll,string findFliter)
