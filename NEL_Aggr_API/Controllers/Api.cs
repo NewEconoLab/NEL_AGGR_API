@@ -648,7 +648,7 @@ namespace NEL_Agency_API.Controllers
                         JO_abi = (MyJson.IJsonNode)MyJson.Parse(ossClient.OssFileDownLoad(System.IO.Path.Combine(pathScript, str_hash + ".abi.json")));
                         JO_result = new JObject();
                         JO_result["avm"] = str_avm;
-                        JO_result["cs"] = Uri.EscapeDataString(str_cs);
+                        JO_result["cs"] = str_cs;// Uri.EscapeDataString(str_cs);
                         JO_result["map"] = JO_map.ToString();
                         JO_result["abi"] = JO_abi.ToString();
                         result = new JArray() { JO_result };
