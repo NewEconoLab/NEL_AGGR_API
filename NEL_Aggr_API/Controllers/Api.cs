@@ -699,6 +699,10 @@ namespace NEL_Agency_API.Controllers
                         JO_result["plugin"] = str_plugin;
                         result = new JArray() { JO_result };
                         break;
+					// test
+                    case "getnodetype":
+                        result = new JArray { new JObject { { "nodeType", netnode } } };
+                        break;
                 }
                 if (result.Count == 0)
                 {
